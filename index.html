@@ -8,11 +8,28 @@
 
 <body>
 
-<!-- 🔝 MENÚ SUPERIOR -->
-<nav>
-    <h2>Arquitectura de Software</h2>
-    <div class="menu">
-        <button onclick="mostrarInicio()">Inicio</button>
+<!-- 🔐 LOGIN INICIAL -->
+<div id="pantallaLogin" class="center">
+
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Universidad_Peruana_Los_Andes_logo.png" width="120">
+
+    <h1>Arquitectura de Software</h1>
+
+    <input type="text" id="user" placeholder="Usuario">
+    <input type="password" id="pass" placeholder="Contraseña">
+
+    <button onclick="login()">Ingresar</button>
+    <button onclick="mostrarRegistro()">Registrarse</button>
+    <button onclick="modoInvitado()">Entrar como invitado</button>
+
+</div>
+
+<!-- 🧭 PANEL PRINCIPAL -->
+<div id="panel" style="display:none;">
+
+    <nav>
+        <h2>Menú</h2>
+        <button onclick="inicio()">Inicio</button>
         <button onclick="verSemana(1)">Semana 1</button>
         <button onclick="verSemana(2)">Semana 2</button>
         <button onclick="verSemana(3)">Semana 3</button>
@@ -22,38 +39,20 @@
         <button onclick="verSemana(7)">Semana 7</button>
         <button onclick="verSemana(8)">Semana 8</button>
         <button onclick="verSemana(9)">Semana 9</button>
-        <button onclick="mostrarLogin()">Iniciar Sesión</button>
-    </div>
-</nav>
+    </nav>
 
-<!-- 📦 CONTENIDO -->
-<div id="contenido">
-    <h1>Bienvenido al curso</h1>
-    <p>Selecciona una semana o inicia sesión</p>
-</div>
+    <div id="contenido"></div>
 
-<!-- 🔐 LOGIN OCULTO -->
-<!-- 🔐 LOGIN -->
-<div id="login" class="login-box" style="display:none;">
-    <h2>Login</h2>
-    <input type="text" id="loginUser" placeholder="Usuario">
-    <input type="password" id="loginPass" placeholder="Contraseña">
-
-    <button onclick="login()">Ingresar</button>
-    <button onclick="mostrarRegistro()">Registrarse</button>
-    <button onclick="modoInvitado()">Entrar como invitado</button>
 </div>
 
 <!-- 📝 REGISTRO -->
-<div id="registro" class="login-box" style="display:none;">
+<div id="registro" class="center" style="display:none;">
     <h2>Registro</h2>
-    <input type="text" id="regUser" placeholder="Nuevo usuario">
-    <input type="password" id="regPass" placeholder="Contraseña">
-
+    <input type="text" id="newUser" placeholder="Usuario">
+    <input type="password" id="newPass" placeholder="Contraseña">
     <button onclick="registrar()">Crear cuenta</button>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
