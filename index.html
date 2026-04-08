@@ -1,1 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema - Arquitectura de Software</title>
+<link rel="stylesheet" href="styles.css">
+</head>
 
+<body>
+
+<div id="login">
+    <h2>Iniciar Sesión</h2>
+    <input type="text" id="user" placeholder="Usuario">
+    <input type="password" id="pass" placeholder="Contraseña">
+    <button onclick="login()">Ingresar</button>
+</div>
+
+<div id="panel" style="display:none;">
+    <h1>Bienvenido</h1>
+
+    <h3>Semanas del curso</h3>
+    <div class="semanas">
+        <button onclick="verSemana(1)">Semana 1</button>
+        <button onclick="verSemana(2)">Semana 2</button>
+        <button onclick="verSemana(3)">Semana 3</button>
+        <button onclick="verSemana(4)">Semana 4</button>
+        <button onclick="verSemana(5)">Semana 5</button>
+        <button onclick="verSemana(6)">Semana 6</button>
+        <button onclick="verSemana(7)">Semana 7</button>
+        <button onclick="verSemana(8)">Semana 8</button>
+        <button onclick="verSemana(9)">Semana 9</button>
+    </div>
+
+    <div id="contenido"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
