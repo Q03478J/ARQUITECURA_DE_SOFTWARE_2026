@@ -1,5 +1,6 @@
 // ===================================
-// FILE UPLOAD SYSTEM WITH SUPABASE
+// FILE UPLOAD SYSTEM - ERY CURSOS
+// SUPABASE STORAGE & DATABASE SYNC
 // ===================================
 
 class FileUploadManager {
@@ -9,409 +10,215 @@ class FileUploadManager {
         this.supabaseClient = null;
         this.maxFileSize = 10 * 1024 * 1024; // 10MB
         this.allowedTypes = [
-            'application/pdf',
-            'application/msword',
+            'application/pdf', 'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-            'text/plain',
-            'application/zip'
+            'image/jpeg', 'image/png', 'application/zip'
         ];
         this.uploadedFiles = [];
         this.init();
     }
 
-    // Initialize Supabase client if credentials provided
-    initSupabase() {
-        if (this.supabaseUrl && this.supabaseKey && window.supabase) {
-            try {
-                this.supabaseClient = window.supabase.createClient(
-                    this.supabaseUrl,
-                    this.supabaseKey
-                );
-                console.log('✓ Supabase connected for file uploads');
-                return true;
-            } catch (error) {
-                console.error('Failed to initialize Supabase:', error);
-                return false;
-            }
-        }
-        console.log('ℹ Using localStorage for file metadata (Supabase not configured)');
-        return false;
-    }
-
-    // Initialize file upload areas
     async init() {
         this.initSupabase();
 
-        // Load files from Supabase database if connected
+        // Cargar archivos: Prioridad Supabase, Fallback LocalStorage
         if (this.supabaseClient) {
             await this.loadFilesFromSupabase();
         } else {
             this.uploadedFiles = this.loadFromStorage();
         }
 
-        this.setupFileInputs();
-        this.setupDragAndDrop();
+        this.setupEventListeners();
         this.renderUploadedFiles();
     }
 
-    // Load files from Supabase database
+    initSupabase() {
+        if (this.supabaseUrl && this.supabaseKey && window.supabase) {
+            this.supabaseClient = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
+            return true;
+        }
+        return false;
+    }
+
+    // --- CARGA DE ARCHIVOS ---
     async loadFilesFromSupabase() {
         try {
-            console.log('📥 Loading files from Supabase database...');
-
             const { data, error } = await this.supabaseClient
                 .from('files')
                 .select('*')
                 .order('upload_date', { ascending: false });
 
-            if (error) {
-                console.error('Error loading files from Supabase:', error);
-                // Fall back to localStorage
-                this.uploadedFiles = this.loadFromStorage();
-                return;
-            }
-
-            if (data && data.length > 0) {
-                // Convert database format to internal format
-                this.uploadedFiles = data.map(file => ({
-                    id: file.id,
-                    name: file.name,
-                    originalName: this.getOriginalFileName(file.name), // Extract clean name
-                    size: file.size,
-                    type: file.type,
-                    unit: file.unit,
-                    lesson: file.lesson,
-                    uploadDate: file.upload_date,
-                    url: file.url
-                }));
-
-                // Also save to localStorage as cache
-                this.saveToStorage();
-
-                console.log(`✓ Loaded ${data.length} files from Supabase database`);
-            } else {
-                console.log('ℹ No files found in database, using localStorage');
-                this.uploadedFiles = this.loadFromStorage();
-            }
+            if (error) throw error;
+            this.uploadedFiles = data || [];
+            this.saveToStorage(); // Sync local cache
         } catch (error) {
-            console.error('Error loading files from Supabase:', error);
-            // Fall back to localStorage if database fails
+            console.error('Error cargando archivos:', error);
             this.uploadedFiles = this.loadFromStorage();
         }
     }
 
-    // Setup file input listeners
-    setupFileInputs() {
-        document.querySelectorAll('.file-upload-input').forEach(input => {
-            input.addEventListener('change', (e) => {
-                this.handleFiles(e.target.files, e.target);
-            });
-        });
-
-        // Trigger file input when clicking on upload area
-        document.querySelectorAll('.file-upload-area').forEach(area => {
-            area.addEventListener('click', () => {
-                const input = area.parentElement.querySelector('.file-upload-input');
-                if (input) input.click();
-            });
-        });
-    }
-
-    // Setup drag and drop
-    setupDragAndDrop() {
-        document.querySelectorAll('.file-upload-area').forEach(area => {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                area.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-            });
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                area.addEventListener(eventName, () => {
-                    area.classList.add('dragover');
-                });
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                area.addEventListener(eventName, () => {
-                    area.classList.remove('dragover');
-                });
-            });
-
-            area.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                const input = area.parentElement.querySelector('.file-upload-input');
-                this.handleFiles(files, input);
-            });
-        });
-    }
-
-    // Handle file selection
-    async handleFiles(files, inputElement) {
-        const unit = inputElement?.dataset.unit || 'general';
-        const lesson = inputElement?.dataset.lesson || 'general';
-
+    // --- MANEJO DE SUBIDAS ---
+    async handleFiles(files, unit, lesson) {
         for (let file of files) {
-            // Validate file
-            if (!this.validateFile(file)) {
-                continue;
-            }
+            if (!this.validateFile(file)) continue;
 
-            // Show loading indication
-            const fileId = this.generateFileId();
-            this.showUploadProgress(fileId, file.name);
+            const fileId = `file_${Date.now()}`;
+            this.setLoading(unit, lesson, true);
 
             try {
-                // Upload to Supabase if connected, otherwise store metadata only
                 let fileUrl = null;
+                const fileName = `${unit}/${lesson}/${Date.now()}_${file.name}`;
+
                 if (this.supabaseClient) {
-                    fileUrl = await this.uploadToSupabase(file, unit, lesson);
+                    // 1. Subir al Bucket 'course-uploads'
+                    const { data: storageData, error: storageError } = await this.supabaseClient
+                        .storage.from('course-uploads').upload(fileName, file);
+                    
+                    if (storageError) throw storageError;
+
+                    // 2. Obtener URL pública
+                    const { data: urlData } = this.supabaseClient
+                        .storage.from('course-uploads').getPublicUrl(fileName);
+                    fileUrl = urlData.publicUrl;
+
+                    // 3. Guardar en Tabla 'files'
+                    const fileMetadata = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        unit: unit,
+                        lesson: lesson,
+                        url: fileUrl,
+                        upload_date: new Date().toISOString()
+                    };
+
+                    await this.supabaseClient.from('files').insert([fileMetadata]);
                 }
 
-                // Store file metadata with original name preserved
-                const fileData = {
-                    id: fileId,
-                    name: file.name,
-                    originalName: file.name, // Store original filename
-                    size: file.size,
-                    type: file.type,
-                    unit: unit,
-                    lesson: lesson,
-                    uploadDate: new Date().toISOString(),
-                    url: fileUrl
-                };
-
-                this.uploadedFiles.push(fileData);
-                this.saveToStorage();
-
-                // Save to Supabase database
-                if (this.supabaseClient && fileUrl) {
-                    await this.saveFileToDatabase(fileData);
-                }
-
-                this.renderUploadedFiles();
-
-                window.ERY.utils.showNotification(`✓ ${file.name} subido exitosamente`, 'success');
+                await this.loadFilesFromSupabase(); // Recargar lista
+                this.notify(`¡${file.name} subido!`, 'success');
             } catch (error) {
-                console.error('Upload error:', error);
-                window.ERY.utils.showNotification(`✗ Error al subir ${file.name}`, 'error');
+                console.error('Error en subida:', error);
+                this.notify('Error al subir archivo', 'error');
+            } finally {
+                this.setLoading(unit, lesson, false);
             }
         }
     }
 
-    // Upload file to Supabase Storage
-    async uploadToSupabase(file, unit, lesson) {
-        if (!this.supabaseClient) {
-            throw new Error('Supabase not configured');
-        }
-
-        const fileName = `${unit}/${lesson}/${Date.now()}_${file.name}`;
-
-        const { data, error } = await this.supabaseClient
-            .storage
-            .from('course-uploads')
-            .upload(fileName, file);
-
-        if (error) throw error;
-
-        // Get public URL
-        const { data: urlData } = this.supabaseClient
-            .storage
-            .from('course-uploads')
-            .getPublicUrl(fileName);
-
-        return urlData.publicUrl;
-    }
-
-    // Save file metadata to Supabase database
-    async saveFileToDatabase(fileData) {
-        try {
-            const { error } = await this.supabaseClient
-                .from('files')
-                .insert([{
-                    id: fileData.id,
-                    name: fileData.name,
-                    size: fileData.size,
-                    type: fileData.type,
-                    unit: fileData.unit,
-                    lesson: fileData.lesson,
-                    upload_date: fileData.uploadDate,
-                    url: fileData.url
-                }]);
-
-            if (error) throw error;
-            console.log('✓ File metadata saved to database');
-        } catch (error) {
-            console.error('Error saving to database:', error);
-        }
-    }
-
-    // Validate file
-    validateFile(file) {
-        // Check file size
-        if (file.size > this.maxFileSize) {
-            window.ERY.utils.showNotification(
-                `El archivo ${file.name} excede el tamaño máximo de 10MB`,
-                'error'
-            );
-            return false;
-        }
-
-        // Check file type
-        if (!this.allowedTypes.includes(file.type)) {
-            window.ERY.utils.showNotification(
-                `Tipo de archivo no permitido: ${file.name}`,
-                'error'
-            );
-            return false;
-        }
-
-        return true;
-    }
-
-    // Show upload progress (simplified version)
-    showUploadProgress(fileId, fileName) {
-        // This is a placeholder - in a real implementation,
-        // you would show an actual progress indicator
-        console.log(`Uploading ${fileName}...`);
-    }
-
-    // Generate unique file ID
-    generateFileId() {
-        return `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    // Extract original filename from storage filename (removes timestamp prefix)
-    getOriginalFileName(storageName) {
-        if (!storageName) return '';
-        // If the name has timestamp prefix (e.g., "123456789_file.pdf"), extract the original name
-        const match = storageName.match(/^\d+_(.+)$/);
-        return match ? match[1] : storageName;
-    }
-
-    // Load uploaded files from localStorage
-    loadFromStorage() {
-        const stored = localStorage.getItem('ery_uploaded_files');
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    // Save uploaded files to localStorage
-    saveToStorage() {
-        localStorage.setItem('ery_uploaded_files', JSON.stringify(this.uploadedFiles));
-    }
-
-    // Get files for specific unit/lesson
-    getFiles(unit = null, lesson = null) {
-        return this.uploadedFiles.filter(file => {
-            if (unit && file.unit !== unit) return false;
-            if (lesson && file.lesson !== lesson) return false;
-            return true;
-        });
-    }
-
-    // Delete file from database
-    async deleteFileFromDatabase(fileId) {
-        try {
-            const { error } = await this.supabaseClient
-                .from('files')
-                .delete()
-                .eq('id', fileId);
-
-            if (error) throw error;
-            console.log('✓ File metadata deleted from database');
-        } catch (error) {
-            console.error('Error deleting from database:', error);
-        }
-    }
-
-    // Delete file
-    async deleteFile(fileId) {
-        const file = this.uploadedFiles.find(f => f.id === fileId);
-        if (!file) return;
-
-        if (!confirm(`¿Eliminar ${file.name}?`)) return;
-
-        // Delete from Supabase Storage if URL exists
-        if (file.url && this.supabaseClient) {
-            try {
-                const filePath = file.url.split('/course-uploads/')[1];
-                await this.supabaseClient
-                    .storage
-                    .from('course-uploads')
-                    .remove([filePath]);
-            } catch (error) {
-                console.error('Error deleting from Supabase Storage:', error);
-            }
-        }
-
-        // Delete from database
-        if (this.supabaseClient) {
-            await this.deleteFileFromDatabase(fileId);
-        }
-
-        // Remove from local storage
-        this.uploadedFiles = this.uploadedFiles.filter(f => f.id !== fileId);
-        this.saveToStorage();
-        this.renderUploadedFiles();
-
-        window.ERY.utils.showNotification('Archivo eliminado', 'info');
-    }
-
-    // Render uploaded files list
+    // --- UI & RENDER ---
     renderUploadedFiles() {
         document.querySelectorAll('.file-list').forEach(container => {
-            const unit = container.dataset.unit;
-            const lesson = container.dataset.lesson;
-            const files = this.getFiles(unit, lesson);
+            const { unit, lesson } = container.dataset;
+            const files = this.uploadedFiles.filter(f => f.unit === unit && f.lesson === lesson);
 
             if (files.length === 0) {
-                container.innerHTML = '<p class="text-muted">No hay archivos subidos</p>';
+                container.innerHTML = '<div class="empty-state">No hay archivos entregados</div>';
                 return;
             }
 
             container.innerHTML = files.map(file => `
-                <div class="file-item" data-file-id="${file.id}">
-                    <svg class="file-item-icon" width="32" height="32" viewBox="0 0 24 24" fill="none">
-                        <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M13 2V9H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div class="file-item-info">
-                        <div class="file-item-name">${file.originalName || this.getOriginalFileName(file.name)}</div>
-                        <div class="file-item-size">${window.ERY.utils.formatFileSize(file.size)} • ${window.ERY.utils.formatDate(file.uploadDate)}</div>
+                <div class="file-item">
+                    <div class="file-info">
+                        <span class="file-icon">${this.getFileIcon(file.type)}</span>
+                        <div class="file-details">
+                            <span class="file-name">${file.name}</span>
+                            <span class="file-meta">${window.ERY.utils.formatFileSize(file.size)} • ${window.ERY.utils.formatDate(file.upload_date)}</span>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        ${file.url ? `
-                            <button class="btn btn-sm btn-ghost" onclick='window.fileViewer.open(${JSON.stringify(file).replace(/'/g, "&#39;")})' title="Ver archivo">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
-                                    <circle cx="12" cy="12" r="3" stroke-width="2"/>
-                                </svg>
-                            </button>
-                            <a href="${file.url}" target="_blank" class="btn btn-sm btn-ghost" title="Descargar">↓</a>
-                        ` : ''}
-                        <button class="file-item-remove" onclick="window.fileUploadManager.deleteFile('${file.id}')" title="Eliminar">✕</button>
+                    <div class="file-actions">
+                        <a href="${file.url}" target="_blank" class="btn-action" title="Descargar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        </a>
+                        <button class="btn-action delete" onclick="window.fileUploadManager.deleteFile(${file.id})" title="Eliminar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
                     </div>
                 </div>
             `).join('');
         });
     }
+
+    // --- ACCIONES ---
+    async deleteFile(id) {
+        if (!confirm('¿Estás seguro de eliminar este archivo?')) return;
+
+        try {
+            if (this.supabaseClient) {
+                // El borrado en cascada debería manejar el Storage si está configurado, 
+                // si no, borramos la entrada de la base de datos:
+                await this.supabaseClient.from('files').delete().eq('id', id);
+            }
+            this.uploadedFiles = this.uploadedFiles.filter(f => f.id !== id);
+            this.saveToStorage();
+            this.renderUploadedFiles();
+            this.notify('Archivo eliminado', 'info');
+        } catch (error) {
+            this.notify('Error al eliminar', 'error');
+        }
+    }
+
+    // --- UTILIDADES ---
+    setupEventListeners() {
+        // Drag & Drop
+        document.querySelectorAll('.file-upload-area').forEach(area => {
+            const input = area.querySelector('input[type="file"]');
+            
+            area.addEventListener('click', () => input.click());
+            
+            input.addEventListener('change', (e) => {
+                const { unit, lesson } = input.dataset;
+                this.handleFiles(e.target.files, unit, lesson);
+            });
+
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                const { unit, lesson } = input.dataset;
+                this.handleFiles(e.dataTransfer.files, unit, lesson);
+            });
+        });
+    }
+
+    getFileIcon(type) {
+        if (type.includes('pdf')) return '📕';
+        if (type.includes('image')) return '🖼️';
+        if (type.includes('word')) return '📘';
+        return '📄';
+    }
+
+    setLoading(unit, lesson, isLoading) {
+        const area = document.querySelector(`.file-upload-area[data-unit="${unit}"][data-lesson="${lesson}"]`);
+        if (area) {
+            area.classList.toggle('loading', isLoading);
+            area.style.opacity = isLoading ? '0.5' : '1';
+            area.style.pointerEvents = isLoading ? 'none' : 'auto';
+        }
+    }
+
+    validateFile(file) {
+        if (file.size > this.maxFileSize) {
+            this.notify('El archivo es demasiado grande (Máx 10MB)', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    notify(m, t) { window.ERY.utils.showNotification(m, t); }
+    loadFromStorage() { return JSON.parse(localStorage.getItem('ery_files') || '[]'); }
+    saveToStorage() { localStorage.setItem('ery_files', JSON.stringify(this.uploadedFiles)); }
 }
 
-// Initialize file upload manager
+// Inicializar
 document.addEventListener('DOMContentLoaded', () => {
-    // Get Supabase credentials from meta tags or config
-    const supabaseUrl = document.querySelector('meta[name="supabase-url"]')?.content;
-    const supabaseKey = document.querySelector('meta[name="supabase-key"]')?.content;
-
-    window.fileUploadManager = new FileUploadManager(supabaseUrl, supabaseKey);
-
-    // Export to ERY namespace
-    window.ERY = window.ERY || {};
-    window.ERY.fileUploadManager = window.fileUploadManager;
+    const url = document.querySelector('meta[name="supabase-url"]')?.content;
+    const key = document.querySelector('meta[name="supabase-key"]')?.content;
+    window.fileUploadManager = new FileUploadManager(url, key);
 });
