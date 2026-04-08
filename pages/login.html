@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-        <meta name="supabase-url" content="https://ziawcvjvfpvudzkmtkba.supabase.co">
-        <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppYXdjdmp2ZnB2dWR6a210a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNDk4ODQsImV4cCI6MjA4MTgyNTg4NH0.tHYQ0Nqui_acDR9LdBMarqg86_HMi6szAqxRABate_o">
+    <meta name="supabase-url" content="https://ziawcvjvfpvudzkmtkba.supabase.co">
+    <meta name="supabase-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppYXdjdmp2ZnB2dWR6a210a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNDk4ODQsImV4cCI6MjA4MTgyNTg4NH0.tHYQ0Nqui_acDR9LdBMarqg86_HMi6szAqxRABate_o">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Iniciar Sesión - ERY CURSOS">
     <title>Iniciar Sesión | ERY CURSOS</title>
@@ -15,21 +15,19 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/chatbox.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+    <link rel="stylesheet" href="../assets/css/chatbox.css">
 </head>
 
 <body style="background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));">
-    <!-- Login Container -->
     <div
         style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--spacing-lg);">
         <div class="card animate-fade-in-scale"
             style="max-width: 450px; width: 100%; border: none; box-shadow: var(--shadow-2xl);">
-            <!-- Logo -->
             <div style="text-align: center; margin-bottom: var(--spacing-2xl);">
-                <img src="images/upla.png" alt="UPLA Logo" style="height: 80px; margin-bottom: var(--spacing-md);"
+                <img src="../assets/images/upla.png" alt="UPLA Logo" style="height: 80px; margin-bottom: var(--spacing-md);"
                     onerror="this.style.display='none'">
                 <h1 class="logo" style="font-size: var(--font-size-3xl); margin-bottom: var(--spacing-xs);">
                     ERY<span class="logo-accent">_CURSOS</span>
@@ -37,7 +35,6 @@
                 <p style="color: var(--color-text-secondary);">Arquitectura de Software</p>
             </div>
 
-            <!-- Login Form -->
             <div class="card-header" style="padding-bottom: var(--spacing-md);">
                 <h2 class="card-title" style="text-align: center;">Iniciar Sesión</h2>
                 <p class="card-description" style="text-align: center;">Ingresa tus credenciales para acceder</p>
@@ -86,7 +83,7 @@
                 </div>
 
                 <div style="text-align: center; margin-top: var(--spacing-md);">
-                    <a href="index.html" class="btn btn-ghost">
+                    <a href="../index.html" class="btn btn-ghost">
                         ← Volver al inicio
                     </a>
                 </div>
@@ -94,11 +91,11 @@
         </div>
     </div>
 
-    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/main.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/chatbox.js"></script>
+    
+    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/chatbox.js"></script>
     <script>
         // Production-ready login with Supabase Auth
         document.addEventListener('DOMContentLoaded', async () => {
