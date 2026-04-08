@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard Estudiante - ERY CURSOS">
+
+    <!-- Supabase Configuration -->
+    <meta name="supabase-url" content="https://ziawcvjvfpvudzkmtkba.supabase.co">
+    <meta name="supabase-key"
+        content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppYXdjdmp2ZnB2dWR6a210a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNDk4ODQsImV4cCI6MjA4MTgyNTg4NH0.tHYQ0Nqui_acDR9LdBMarqg86_HMi6szAqxRABate_o">
+
+    <title>Mi Dashboard | ERY CURSOS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="logo">ERY<span class="logo-accent">_CURSOS</span></h1>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Inicio</a></li>
+                <li><a href="courses.html" class="nav-link">Cursos</a></li>
+                <li><a href="#" class="nav-link active">Mi Dashboard</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link btn-login">Cerrar Sesión</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <img src="images/upla.png" alt="UPLA Logo" class="upla-logo" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="container" style="padding-top: 100px; padding-bottom: var(--spacing-4xl);">
+        <!-- Welcome Header -->
+        <div style="margin-bottom: var(--spacing-2xl);">
+            <h1 class="hero-title" style="font-size: var(--font-size-3xl);">
+                Mi <span class="gradient-text">Dashboard</span>
+            </h1>
+            <p class="hero-subtitle" id="welcomeText">Bienvenido, cargando...</p>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="card animate-fade-in" style="margin-bottom: var(--spacing-2xl);">
+            <div class="card-header">
+                <h3 class="card-title">Mi Progreso General</h3>
+            </div>
+            <div class="card-body">
+                <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                    <div style="font-size: var(--font-size-4xl); font-weight: var(--font-weight-bold); color: var(--color-primary);"
+                        id="overallProgress">0%</div>
+                    <div style="color: var(--color-text-secondary);">Completado</div>
+                </div>
+
+                <!-- Units Progress -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
+                            <span>Unidad I</span>
+                            <span id="unit1Progress">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="unit1Bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
+                            <span>Unidad II</span>
+                            <span id="unit2Progress">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="unit2Bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
+                            <span>Unidad III</span>
+                            <span id="unit3Progress">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="unit3Bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
+                            <span>Unidad IV</span>
+                            <span id="unit4Progress">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="unit4Bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Access -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+            <a href="unidad1.html" class="card animate-fade-in" style="text-decoration: none;">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl);">📚</div>
+                    <h4>Unidad I</h4>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Fundamentos</p>
+                </div>
+            </a>
+
+            <a href="unidad2.html" class="card animate-fade-in animation-delay-1" style="text-decoration: none;">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl);">🎯</div>
+                    <h4>Unidad II</h4>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Patrones</p>
+                </div>
+            </a>
+
+            <a href="unidad3.html" class="card animate-fade-in animation-delay-2" style="text-decoration: none;">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl);">🏗️</div>
+                    <h4>Unidad III</h4>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Diseño</p>
+                </div>
+            </a>
+
+            <a href="unidad4.html" class="card animate-fade-in animation-delay-3" style="text-decoration: none;">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl);">⚡</div>
+                    <h4>Unidad IV</h4>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Evaluación</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- My Assignments -->
+        <div class="card animate-fade-in">
+            <div class="card-header">
+                <h3 class="card-title">Mis Asignaciones</h3>
+            </div>
+            <div class="card-body">
+                <div id="assignmentsContainer">Cargando asignaciones...</div>
+            </div>
+        </div>
+
+        <!-- Recent Uploads -->
+        <div class="card animate-fade-in" style="margin-top: var(--spacing-xl);">
+            <div class="card-header">
+                <h3 class="card-title">Mis Últimas Entregas</h3>
+            </div>
+            <div class="card-body">
+                <div id="recentUploads">Cargando archivos...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/progress.js"></script>
+    <script>
+        // Student Dashboard Logic
+        let supabase;
+        let currentUser;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for auth manager
+            while (!window.authManager) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Protect route - only students
+            if (!window.authManager.protectRoute('student')) {
+                return;
+            }
+
+            supabase = window.authManager.supabaseClient;
+            currentUser = window.authManager.getProfile();
+
+            document.getElementById('welcomeText').textContent = `Bienvenido, ${currentUser.full_name}`;
+
+            // Wait for progress tracker
+            while (!window.progressTracker) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Load dashboard data
+            await loadProgress();
+            await loadAssignments();
+            await loadRecentUploads();
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                await window.authManager.signOut();
+                window.location.href = 'index.html';
+            });
+        });
+
+        async function loadProgress() {
+            try {
+                // Get progress from progress tracker
+                const progress = window.progressTracker.progress;
+
+                // Calculate overall
+                const overall = await window.progressTracker.getOverallProgress();
+                document.getElementById('overallProgress').textContent = `${overall}%`;
+
+                // Update each unit
+                for (let i = 1; i <= 4; i++) {
+                    const unitKey = `unidad${i}`;
+                    const unitProgress = progress[unitKey].progress;
+
+                    document.getElementById(`unit${i}Progress`).textContent = `${unitProgress}%`;
+                    document.getElementById(`unit${i}Bar`).style.width = `${unitProgress}%`;
+                }
+            } catch (error) {
+                console.error('Error loading progress:', error);
+            }
+        }
+
+        async function loadAssignments() {
+            try {
+                const { data: assignments, error } = await supabase
+                    .from('assignments')
+                    .select('*, units(*)')
+                    .order('unit_id', { ascending: true })
+                    .order('week_number', { ascending: true });
+
+                if (error) throw error;
+
+                const container = document.getElementById('assignmentsContainer');
+
+                if (!assignments || assignments.length === 0) {
+                    container.innerHTML = '<p>No hay asignaciones disponibles.</p>';
+                    return;
+                }
+
+                // Get user's submissions
+                const { data: submissions } = await supabase
+                    .from('submissions')
+                    .select('assignment_id, status')
+                    .eq('user_id', currentUser.id);
+
+                const submissionMap = {};
+                if (submissions) {
+                    submissions.forEach(sub => {
+                        submissionMap[sub.assignment_id] = sub.status;
+                    });
+                }
+
+                container.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Unidad</th>
+                                <th>Semana</th>
+                                <th>Título</th>
+                                <th>Fecha Límite</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${assignments.map(assignment => {
+                    const status = submissionMap[assignment.id] || 'pending';
+                    const statusText = {
+                        'pending': '⏳ Pendiente',
+                        'submitted': '✓ Entregado',
+                        'completed': '🔒 Completado',
+                        'locked': '🔒 Bloqueado'
+                    }[status] || '⏳ Pendiente';
+
+                    return `
+                                    <tr>
+                                        <td>Unidad ${assignment.units.unit_number}</td>
+                                        <td>Semana ${assignment.week_number}</td>
+                                        <td>${assignment.title}</td>
+                                        <td>${assignment.deadline ? new Date(assignment.deadline).toLocaleDateString('es-ES') : 'Sin límite'}</td>
+                                        <td>${statusText}</td>
+                                    </tr>
+                                `;
+                }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+                document.getElementById('assignmentsContainer').innerHTML = '<p>Error al cargar asignaciones</p>';
+            }
+        }
+
+        async function loadRecentUploads() {
+            try {
+                const { data: files, error } = await supabase
+                    .from('files')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('upload_date', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+
+                const container = document.getElementById('recentUploads');
+
+                if (!files || files.length === 0) {
+                    container.innerHTML = '<p>No has subido archivos todavía.</p>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Archivo</th>
+                                <th>Unidad/Semana</th>
+                                <th>Fecha de Subida</th>
+                                <th>Tamaño</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${files.map(file => `
+                                <tr>
+                                    <td>${file.original_name || file.name}</td>
+                                    <td>${file.unit} / ${file.lesson}</td>
+                                    <td>${new Date(file.upload_date).toLocaleString('es-ES')}</td>
+                                    <td>${formatFileSize(file.size)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error loading uploads:', error);
+                document.getElementById('recentUploads').innerHTML = '<p>Error al cargar archivos</p>';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+    </script>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.3s ease;
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard Evaluador - ERY CURSOS">
+
+    <!-- Supabase Configuration -->
+    <meta name="supabase-url" content="https://ziawcvjvfpvudzkmtkba.supabase.co">
+    <meta name="supabase-key"
+        content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppYXdjdmp2ZnB2dWR6a210a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNDk4ODQsImV4cCI6MjA4MTgyNTg4NH0.tHYQ0Nqui_acDR9LdBMarqg86_HMi6szAqxRABate_o">
+
+    <title>Dashboard Evaluador | ERY CURSOS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Admin Modules -->
+    <script src="js/grading.js"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="logo">ERY<span class="logo-accent">_EVALUATOR</span></h1>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Inicio</a></li>
+                <li><a href="#" class="nav-link active">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link btn-login">Cerrar Sesión</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <img src="images/upla.png" alt="UPLA Logo" class="upla-logo" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="container" style="padding-top: 100px; padding-bottom: var(--spacing-4xl);">
+        <!-- Welcome Header -->
+        <div style="margin-bottom: var(--spacing-2xl);">
+            <h1 class="hero-title" style="font-size: var(--font-size-3xl);">
+                Dashboard <span class="gradient-text">Evaluador</span>
+            </h1>
+            <p class="hero-subtitle" id="welcomeText">Bienvenido, cargando...</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+            <div class="card animate-fade-in">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary);"
+                        id="totalGraded">0</div>
+                    <div style="color: var(--color-text-secondary); margin-top: var(--spacing-xs);">Tareas Calificadas
+                    </div>
+                </div>
+            </div>
+
+            <div class="card animate-fade-in animation-delay-1">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-warning);"
+                        id="pendingGrades">0</div>
+                    <div style="color: var(--color-text-secondary); margin-top: var(--spacing-xs);">Pendientes</div>
+                </div>
+            </div>
+
+            <div class="card animate-fade-in animation-delay-2">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-success);"
+                        id="averageGrade">0.00</div>
+                    <div style="color: var(--color-text-secondary); margin-top: var(--spacing-xs);">Promedio General
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card">
+            <div class="card-header" style="border-bottom: 1px solid var(--color-border);">
+                <div style="display: flex; gap: var(--spacing-md);">
+                    <button class="tab-btn active" data-tab="pending">⏳ Pendientes</button>
+                    <button class="tab-btn" data-tab="graded">✅ Calificadas</button>
+                    <button class="tab-btn" data-tab="students">👥 Estudiantes</button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Pending Tab -->
+                <div id="pending-tab" class="tab-content active">
+                    <h3 style="margin-bottom: var(--spacing-lg);">Entregas Pendientes</h3>
+
+                    <div style="margin-bottom: var(--spacing-md);">
+                        <select id="unitFilter" class="form-input" style="width: 200px;">
+                            <option value="">Todas las Unidades</option>
+                            <option value="1">Unidad I</option>
+                            <option value="2">Unidad II</option>
+                            <option value="3">Unidad III</option>
+                            <option value="4">Unidad IV</option>
+                        </select>
+                    </div>
+
+                    <div id="pendingTable">Cargando entregas...</div>
+                </div>
+
+                <!-- Graded Tab -->
+                <div id="graded-tab" class="tab-content" style="display: none;">
+                    <h3 style="margin-bottom: var(--spacing-lg);">Tareas Calificadas</h3>
+
+                    <div style="display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-md);">
+                        <select id="gradedUnitFilter" class="form-input" style="width: 200px;">
+                            <option value="">Todas las Unidades</option>
+                            <option value="1">Unidad I</option>
+                            <option value="2">Unidad II</option>
+                            <option value="3">Unidad III</option>
+                            <option value="4">Unidad IV</option>
+                        </select>
+                        <button class="btn btn-secondary" id="exportGradesBtn">📊 Exportar CSV</button>
+                    </div>
+
+                    <div id="gradedTable">Cargando calificaciones...</div>
+                </div>
+
+                <!-- Students Tab -->
+                <div id="students-tab" class="tab-content" style="display: none;">
+                    <h3 style="margin-bottom: var(--spacing-lg);">Lista de Estudiantes</h3>
+                    <div id="studentsTable">Cargando estudiantes...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade Modal -->
+    <div id="gradeModal" class="modal" style="display: none;">
+        <div class="modal-content card" style="max-width: 600px;">
+            <div class="card-header">
+                <h3 class="card-title">Calificar Entrega</h3>
+            </div>
+            <div class="card-body">
+                <form id="gradeForm">
+                    <input type="hidden" id="gradeSubmissionId">
+
+                    <div id="gradeSubmissionInfo"
+                        style="margin-bottom: var(--spacing-md); padding: var(--spacing-sm); background: var(--color-bg-secondary); border-radius: 6px;">
+                        <!-- Will be populated -->
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Calificación (0-20)</label>
+                        <input type="number" id="gradeValue" class="form-input" min="0" max="20" step="0.5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Retroalimentación</label>
+                        <textarea id="gradeFeedback" class="form-input" rows="4"
+                            placeholder="Escribe comentarios sobre la entrega..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                        <button type="submit" class="btn btn-primary">Guardar Calificación</button>
+                        <button type="button" class="btn btn-secondary" id="cancelGradeModalBtn">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .tab-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-btn:hover {
+            color: var(--color-primary);
+        }
+
+        .tab-content {
+            padding-top: var(--spacing-lg);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            margin: var(--spacing-lg);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+        }
+    </style>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let gradingManager;
+        let supabase;
+        let currentUser;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for auth manager
+            while (!window.authManager) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Protect route - evaluator only
+            if (!window.authManager.protectRoute('evaluator')) {
+                return;
+            }
+
+            supabase = window.authManager.supabaseClient;
+            currentUser = window.authManager.getProfile();
+
+            gradingManager = new GradingManager(supabase);
+
+            document.getElementById('welcomeText').textContent = `Bienvenido, ${currentUser.full_name}`;
+
+            // Load data
+            await loadStats();
+            await loadPendingSubmissions();
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+                    btn.classList.add('active');
+                    document.getElementById(`${tab}-tab`).style.display = 'block';
+
+                    switch (tab) {
+                        case 'pending':
+                            loadPendingSubmissions();
+                            break;
+                        case 'graded':
+                            loadGradedSubmissions();
+                            break;
+                        case 'students':
+                            loadStudents();
+                            break;
+                    }
+                });
+            });
+
+            // Filters
+            document.getElementById('unitFilter').addEventListener('change', loadPendingSubmissions);
+            document.getElementById('gradedUnitFilter').addEventListener('change', loadGradedSubmissions);
+
+            // Grading modal
+            document.getElementById('cancelGradeModalBtn').addEventListener('click', () => {
+                document.getElementById('gradeModal').style.display = 'none';
+            });
+
+            document.getElementById('gradeForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitGrade();
+            });
+
+            // Export
+            document.getElementById('exportGradesBtn').addEventListener('click', async () => {
+                const unitId = document.getElementById('gradedUnitFilter').value;
+                await gradingManager.exportGradesToCSV({ unitId });
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                await window.authManager.signOut();
+                window.location.href = 'index.html';
+            });
+        }
+
+        async function loadStats() {
+            const stats = await gradingManager.getGradingStats();
+
+            if (stats.success) {
+                document.getElementById('totalGraded').textContent = stats.data.totalGraded;
+                document.getElementById('pendingGrades').textContent = stats.data.pending;
+                document.getElementById('averageGrade').textContent = stats.data.averageGrade.toFixed(2);
+            }
+        }
+
+        async function loadPendingSubmissions() {
+            const unitId = document.getElementById('unitFilter').value;
+            const filters = unitId ? { unitId } : {};
+
+            const result = await gradingManager.loadPendingSubmissions(filters);
+
+            const table = document.getElementById('pendingTable');
+
+            if (!result.success || !result.data || result.data.length === 0) {
+                table.innerHTML = '<p>No hay entregas pendientes de calificar.</p>';
+                return;
+            }
+
+            table.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Unidad</th>
+                            <th>Tarea</th>
+                            <th>Fecha Entrega</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.data.map(sub => `
+                            <tr>
+                                <td>${sub.usuarios?.full_name || 'N/A'}</td>
+                                <td>Unidad ${sub.assignments?.units?.unit_number || 'N/A'}</td>
+                                <td>${sub.assignments?.title || 'N/A'}</td>
+                                <td>${new Date(sub.submitted_at).toLocaleDateString('es-ES')}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="openGradeModal('${sub.id}', '${sub.usuarios?.full_name}', '${sub.assignments?.title}')">
+                                        📝 Calificar
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        async function loadGradedSubmissions() {
+            const unitId = document.getElementById('gradedUnitFilter').value;
+            // TODO: Load graded submissions
+        }
+
+        async function loadStudents() {
+            try {
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .select('*')
+                    .eq('role', 'student')
+                    .order('full_name', { ascending: true });
+
+                if (error) throw error;
+
+                const table = document.getElementById('studentsTable');
+
+                if (!data || data.length === 0) {
+                    table.innerHTML = '<p>No hay estudiantes registrados.</p>';
+                    return;
+                }
+
+                table.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th>Fecha Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(user => `
+                                <tr>
+                                    <td>${user.full_name}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.active ? '<span style="color: var(--color-success)">✅ Activo</span>' : '<span style="color: var(--color-error)">❌ Inactivo</span>'}</td>
+                                    <td>${new Date(user.created_at).toLocaleDateString('es-ES')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+
+        async function openGradeModal(submissionId, studentName, assignmentTitle) {
+            document.getElementById('gradeSubmissionId').value = submissionId;
+            document.getElementById('gradeSubmissionInfo').innerHTML = `
+                <strong>Estudiante:</strong> ${studentName}<br>
+                <strong>Tarea:</strong> ${assignmentTitle}
+            `;
+            document.getElementById('gradeValue').value = '';
+            document.getElementById('gradeFeedback').value = '';
+
+            document.getElementById('gradeModal').style.display = 'flex';
+        }
+
+        async function submitGrade() {
+            const submissionId = document.getElementById('gradeSubmissionId').value;
+            const grade = document.getElementById('gradeValue').value;
+            const feedback = document.getElementById('gradeFeedback').value;
+
+            if (!grade) {
+                alert('Por favor, ingresa una calificación');
+                return;
+            }
+
+            const result = await gradingManager.gradeSubmission(
+                submissionId,
+                grade,
+                feedback,
+                currentUser.id
+            );
+
+            if (result.success) {
+                alert('✓ Calificación guardada exitosamente');
+                document.getElementById('gradeModal').style.display = 'none';
+                await loadPendingSubmissions();
+                await loadStats();
+            } else {
+                alert('✗ Error: ' + result.error);
+            }
+        }
+
+        // Make function accessible globally
+        window.openGradeModal = openGradeModal;
+    </script>
+</body>
+
+</html>

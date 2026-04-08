@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Curso de Arquitectura de Software - Vista General">
+    <title>Arquitectura de Software | ERY CURSOS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/chatbox.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="logo">ERY<span class="logo-accent">_CURSOS</span></h1>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Inicio</a></li>
+                <li><a href="courses.html" class="nav-link active">ARQUITECTURA SW</a></li>
+                <li><a href="unidad1.html" class="nav-link">UNIDAD I</a></li>
+                <li><a href="unidad2.html" class="nav-link">UNIDAD II</a></li>
+                <li><a href="unidad3.html" class="nav-link">UNIDAD III</a></li>
+                <li><a href="unidad4.html" class="nav-link">UNIDAD IV</a></li>
+                <li><a href="contact.html" class="nav-link">Contáctenos</a></li>
+                <li><a href="login.html" class="nav-link btn-login">Iniciar sesión</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="2" />
+                        <path
+                            d="M10 2V4M10 16V18M18 10H16M4 10H2M15.657 4.343L14.243 5.757M5.757 14. 243L4.343 15.657M15.657 15.657L14.243 14.243M5.757 5.757L4.343 4.343"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+                            stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <img src="images/upla.png" alt="UPLA Logo" class="upla-logo" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Course Hero -->
+    <section
+        style="padding-top: 120px; padding-bottom: var(--spacing-3xl); background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));">
+        <div class="container">
+            <div style="max-width: 900px; margin: 0 auto; text-align: center; color: white;">
+                <span class="badge badge-primary"
+                    style="margin-bottom: var(--spacing-md); background: rgba(255, 255, 255, 0.2);">CURSO
+                    COMPLETO</span>
+                <h1 class="hero-title animate-fade-in" style="color: white;">
+                    Arquitectura de Software
+                </h1>
+                <p class="hero-subtitle animate-fade-in animation-delay-1" style="color: rgba(255, 255, 255, 0.9);">
+                    Domina los fundamentos y técnicas avanzadas para diseñar sistemas robustos y escalables
+                </p>
+
+                <div class="hero-stats animate-fade-in animation-delay-2" style="margin-top: var(--spacing-2xl);">
+                    <div class="stat-card" style="background: rgba(255, 255, 255, 0.15); border: none;">
+                        <div class="stat-number" style="-webkit-text-fill-color: white;">4</div>
+                        <div class="stat-label" style="color: rgba(255, 255, 255, 0.9);">Unidades</div>
+                    </div>
+                    <div class="stat-card" style="background: rgba(255, 255, 255, 0.15); border: none;">
+                        <div class="stat-number" style="-webkit-text-fill-color: white;">16</div>
+                        <div class="stat-label" style="color: rgba(255, 255, 255, 0.9);">Semanas</div>
+                    </div>
+                    <div class="stat-card" style="background: rgba(255, 255, 255, 0.15); border: none;">
+                        <div class="stat-number" style="-webkit-text-fill-color: white;">Online</div>
+                        <div class="stat-label" style="color: rgba(255, 255, 255, 0.9);">100% Virtual</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Progress Overview -->
+    <section class="container" style="padding: var(--spacing-3xl) var(--spacing-lg);">
+        <div class="card" style="max-width: 1000px; margin: 0 auto;">
+            <div class="card-header">
+                <h2 class="card-title">Tu Progreso General</h2>
+                <p class="card-description">Completa todas las unidades para dominar la arquitectura de software</p>
+            </div>
+            <div class="card-body">
+                <div class="progress-label">
+                    <span>Progreso del curso</span>
+                    <span id="overall-progress-text">0%</span>
+                </div>
+                <div class="progress" style="height: 12px;">
+                    <div class="progress-bar" id="overall-progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Units Grid -->
+    <section class="container" style="padding: 0 var(--spacing-lg) var(--spacing-4xl);">
+        <div class="units-grid" style="max-width: 1200px; margin: 0 auto;">
+
+            <!-- Unidad I -->
+            <a href="unidad1.html" class="unit-card animate-fade-in">
+                <div class="unit-icon"
+                    style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <rect x="8" y="8" width="24" height="24" rx="4" stroke="currentColor" stroke-width="2" />
+                        <path d="M16 20L18 22L24 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="unit-content">
+                    <h3 class="unit-title">UNIDAD I</h3>
+                    <p class="unit-description">Fundamentos de Arquitectura de Software</p>
+                    <div class="unit-meta">
+                        <span class="unit-lessons">4 Semanas</span>
+                        <span class="unit-progress">0% completado</span>
+                    </div>
+                    <ul
+                        style="margin-top: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-text-tertiary); list-style: none; padding: 0;">
+                        <li>✓ Introducción a la arquitectura</li>
+                        <li>✓ Atributos de calidad</li>
+                        <li>✓ Vistas arquitectónicas</li>
+                        <li>✓ Evaluación</li>
+                    </ul>
+                </div>
+                <div class="unit-arrow">→</div>
+            </a>
+
+            <!-- Unidad II -->
+            <a href="unidad2.html" class="unit-card animate-fade-in animation-delay-1">
+                <div class="unit-icon"
+                    style="background: linear-gradient(135deg, var(--color-secondary), var(--color-accent-dark));">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <rect x="8" y="8" width="24" height="24" rx="4" stroke="currentColor" stroke-width="2" />
+                        <path d="M16 16H24M16 20H24M16 24H20" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="unit-content">
+                    <h3 class="unit-title">UNIDAD II</h3>
+                    <p class="unit-description">Patrones y Estilos Arquitectónicos</p>
+                    <div class="unit-meta">
+                        <span class="unit-lessons">4 Semanas</span>
+                        <span class="unit-progress">0% completado</span>
+                    </div>
+                    <ul
+                        style="margin-top: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-text-tertiary); list-style: none; padding: 0;">
+                        <li>✓ Patrones fundamentales</li>
+                        <li>✓ Arquitecturas distribuidas</li>
+                        <li>✓ Estilos modernos</li>
+                        <li>✓ Evaluación</li>
+                    </ul>
+                </div>
+                <div class="unit-arrow">→</div>
+            </a>
+
+            <!-- Unidad III -->
+            <a href="unidad3.html" class="unit-card animate-fade-in animation-delay-2">
+                <div class="unit-icon"
+                    style="background: linear-gradient(135deg, var(--color-accent), var(--color-primary));">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <rect x="8" y="8" width="24" height="24" rx="4" stroke="currentColor" stroke-width="2" />
+                        <circle cx="20" cy="16" r="3" stroke="currentColor" stroke-width="2" />
+                        <path d="M12 28C12 24 16 24 20 24C24 24 28 24 28 28" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="unit-content">
+                    <h3 class="unit-title">UNIDAD III</h3>
+                    <p class="unit-description">Diseño y Modelado de Arquitecturas</p>
+                    <div class="unit-meta">
+                        <span class="unit-lessons">4 Semanas</span>
+                        <span class="unit-progress">0% completado</span>
+                    </div>
+                    <ul
+                        style="margin-top: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-text-tertiary); list-style: none; padding: 0;">
+                        <li>✓ Notaciones y UML</li>
+                        <li>✓ Diseño de componentes</li>
+                        <li>✓ Modelado de datos</li>
+                        <li>✓ Evaluación</li>
+                    </ul>
+                </div>
+                <div class="unit-arrow">→</div>
+            </a>
+
+            <!-- Unidad IV -->
+            <a href="unidad4.html" class="unit-card animate-fade-in animation-delay-3">
+                <div class="unit-icon"
+                    style="background: linear-gradient(135deg, var(--color-accent-dark), var(--color-primary-dark));">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <rect x="8" y="8" width="24" height="24" rx="4" stroke="currentColor" stroke-width="2" />
+                        <path d="M20 14V26M14 20H26" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="unit-content">
+                    <h3 class="unit-title">UNIDAD IV</h3>
+                    <p class="unit-description">Evaluación y Optimización</p>
+                    <div class="unit-meta">
+                        <span class="unit-lessons">4 Semanas</span>
+                        <span class="unit-progress">0% completado</span>
+                    </div>
+                    <ul
+                        style="margin-top: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-text-tertiary); list-style: none; padding: 0;">
+                        <li>✓ Métodos de evaluación</li>
+                        <li>✓ Performance y escalabilidad</li>
+                        <li>✓ Refactoring arquitectónico</li>
+                        <li>✓ Proyecto final</li>
+                    </ul>
+                </div>
+                <div class="unit-arrow">→</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>ERY_CURSOS</h3>
+                    <p>Innovación en sistemas y educación de calidad</p>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Navegación</h4>
+                        <ul>
+                            <li><a href="index.html">Inicio</a></li>
+                            <li><a href="courses.html">Cursos</a></li>
+                            <li><a href="contact.html">Contacto</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Unidades</h4>
+                        <ul>
+                            <li><a href="unidad1.html">Unidad I</a></li>
+                            <li><a href="unidad2.html">Unidad II</a></li>
+                            <li><a href="unidad3.html">Unidad III</a></li>
+                            <li><a href="unidad4.html">Unidad IV</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Términos de servicio</a></li>
+                            <li><a href="#">Política de privacidad</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Edwin Ramirez. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/chatbox.js"></script>
+    <script>
+        // Calculate and display overall progress
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.progressTracker) {
+                const overallProgress = window.progressTracker.getOverallProgress();
+                document.getElementById('overall-progress-text').textContent = `${overallProgress}%`;
+                document.getElementById('overall-progress-bar').style.width = `${overallProgress}%`;
+            }
+        });
+    </script>
+</body>
+
+</html>

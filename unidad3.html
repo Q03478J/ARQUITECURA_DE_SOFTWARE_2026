@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Unidad III - Diseño y Modelado de Arquitecturas">
+
+    <!-- Supabase Configuration -->
+    <meta name="supabase-url" content="https://ziawcvjvfpvudzkmtkba.supabase.co">
+    <meta name="supabase-key"
+        content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppYXdjdmp2ZnB2dWR6a210a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNDk4ODQsImV4cCI6MjA4MTgyNTg4NH0.tHYQ0Nqui_acDR9LdBMarqg86_HMi6szAqxRABate_o">
+
+    <title>UNIDAD III - Diseño y Modelado | ERY CURSOS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/chatbox.css">
+    <link rel="stylesheet" href="css/fileViewer.css">
+    <link rel="stylesheet" href="css/trophy.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="logo">ERY<span class="logo-accent">_CURSOS</span></h1>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Inicio</a></li>
+                <li><a href="courses.html" class="nav-link">ARQUITECTURA SW</a></li>
+                <li><a href="unidad1.html" class="nav-link">UNIDAD I</a></li>
+                <li><a href="unidad2.html" class="nav-link">UNIDAD II</a></li>
+                <li><a href="unidad3.html" class="nav-link active">UNIDAD III</a></li>
+                <li><a href="unidad3.html" class="nav-link">UNIDAD III</a></li>
+                <li><a href="unidad4.html" class="nav-link">UNIDAD IV</a></li>
+                <li><a href="contact.html" class="nav-link">Contáctenos</a></li>
+                <li><a href="login.html" class="nav-link btn-login">Iniciar sesión</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="2" />
+                        <path
+                            d="M10 2V4M10 16V18M18 10H16M4 10H2M15.657 4.343L14.243 5.757M5.757 14.243L4.343 15.657M15.657 15.657L14.243 14.243M5.757 5.757L4.343 4.343"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+                            stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <img src="images/upla.png" alt="UPLA Logo" class="upla-logo" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="container" style="padding-top: 100px;">
+        <nav class="breadcrumb">
+            <div class="breadcrumb-item"><a href="index.html">Inicio</a></div>
+            <div class="breadcrumb-item"><a href="courses.html">Arquitectura SW</a></div>
+            <div class="breadcrumb-item">Unidad III</div>
+        </nav>
+    </div>
+
+    <!-- Unit Header -->
+    <section class="container" style="padding: var(--spacing-3xl) var(--spacing-lg);">
+        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <h1 class="hero-title" style="font-size: var(--font-size-4xl);">
+                <span class="gradient-text">UNIDAD III</span>
+            </h1>
+            <p class="hero-subtitle">Comunicación de Arquitecturas</p>
+
+            <div style="margin-top: var(--spacing-xl);">
+                <div class="progress-label">
+                    <span>Progreso de la unidad</span>
+                    <span id="unit3-progress-text">0%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" data-unit="unidad3" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lessons -->
+    <section class="container" style="padding: 0 var(--spacing-lg) var(--spacing-4xl);">
+        <div style="max-width: 1000px; margin: 0 auto;">
+
+            <!-- Semana 1 -->
+            <div class="card animate-fade-in" style="margin-bottom: var(--spacing-xl);">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 class="card-title">Semana 09</h3>
+                            <p class="card-description">Fundamentos de comunicación</p>
+                        </div>
+                        <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                            <input type="checkbox" class="lesson-checkbox" data-unit="unidad3" data-lesson-id="semana1">
+                            <span>Completado</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4>Contenido de la semana:</h4>
+                    <ul style="list-style-position: inside; color: var(--color-text-secondary);">
+                        <li>Fundamentos de comunicación entre arquitecturas</li>
+                        <li>Tipos, protocolos y mecanismos de transmisión</li>
+                        <li>Enfoque de proyecto</li>
+                        <li>Producto: informe técnico de métodos de comunicación</li>
+                    </ul>
+
+                    <h4 style="margin-top: var(--spacing-lg);">Material de apoyo:</h4>
+                    <div class="file-upload" style="margin-top: var(--spacing-md);">
+                        <div class="file-upload-area">
+                            <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M17 8L12 3M12 3L7 8M12 3V15"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <div class="file-upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+                            <div class="file-upload-hint">PDF, Word, PowerPoint, imágenes (Máx. 10MB)</div>
+                            <input type="file" class="file-upload-input" data-unit="unidad3" data-lesson="semana1"
+                                multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt,.zip">
+                        </div>
+                        <div class="file-list" data-unit="unidad3" data-lesson="semana1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semana 2 -->
+            <div class="card animate-fade-in animation-delay-1" style="margin-bottom: var(--spacing-xl);">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 class="card-title">Semana 10</h3>
+                            <p class="card-description">Modelo de comunicación</p>
+                        </div>
+                        <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                            <input type="checkbox" class="lesson-checkbox" data-unit="unidad3" data-lesson-id="semana2">
+                            <span>Completado</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4>Contenido de la semana:</h4>
+                    <ul style="list-style-position: inside; color: var(--color-text-secondary);">
+                        <li>Diseño del modelo de comunicación entre componentes</li>
+                        <li>Técnicas de transmisión + estándares internacionales</li>
+                        <li>Representación de interacción distribuida</li>
+                        <li>Producto: diagramas de comunicación distribuida</li>
+                    </ul>
+
+                    <h4 style="margin-top: var(--spacing-lg);">Material de apoyo:</h4>
+                    <div class="file-upload" style="margin-top: var(--spacing-md);">
+                        <div class="file-upload-area">
+                            <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M17 8L12 3M12 3L7 8M12 3V15"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <div class="file-upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+                            <div class="file-upload-hint">PDF, Word, PowerPoint, imágenes (Máx. 10MB)</div>
+                            <input type="file" class="file-upload-input" data-unit="unidad3" data-lesson="semana2"
+                                multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt,.zip">
+                        </div>
+                        <div class="file-list" data-unit="unidad3" data-lesson="semana2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semana 3 -->
+            <div class="card animate-fade-in animation-delay-2" style="margin-bottom: var(--spacing-xl);">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 class="card-title">Semana 11</h3>
+                            <p class="card-description">Implementación de comunicación</p>
+                        </div>
+                        <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                            <input type="checkbox" class="lesson-checkbox" data-unit="unidad3" data-lesson-id="semana3">
+                            <span>Completado</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4>Contenido de la semana:</h4>
+                    <ul style="list-style-position: inside; color: var(--color-text-secondary);">
+                        <li>Implementación de mecanismos de comunicación</li>
+                        <li>Validación en entorno de desarrollo</li>
+                        <li>Intercambio por APIs o eventos</li>
+                        <li>Producto: repositorio con servicios integrados</li>
+                    </ul>
+
+                    <h4 style="margin-top: var(--spacing-lg);">Material de apoyo:</h4>
+                    <div class="file-upload" style="margin-top: var(--spacing-md);">
+                        <div class="file-upload-area">
+                            <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M17 8L12 3M12 3L7 8M12 3V15"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <div class="file-upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+                            <div class="file-upload-hint">PDF, Word, PowerPoint, imágenes (Máx. 10MB)</div>
+                            <input type="file" class="file-upload-input" data-unit="unidad3" data-lesson="semana3"
+                                multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt,.zip">
+                        </div>
+                        <div class="file-list" data-unit="unidad3" data-lesson="semana3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semana 4 -->
+            <div class="card animate-fade-in animation-delay-3" style="margin-bottom: var(--spacing-xl);">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 class="card-title">Semana 12</h3>
+                            <p class="card-description">Evaluación de comunicación</p>
+                        </div>
+                        <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                            <input type="checkbox" class="lesson-checkbox" data-unit="unidad3" data-lesson-id="semana4">
+                            <span>Completado</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4>Actividades:</h4>
+                    <ul style="list-style-position: inside; color: var(--color-text-secondary);">
+                        <li>Evaluación de eficiencia y seguridad de comunicación</li>
+                        <li>Métricas de rendimiento y seguridad</li>
+                        <li>Identificación de mejoras y recomendaciones</li>
+                        <li>Producto: informe de evaluación con propuestas</li>
+                    </ul>
+
+                    <h4 style="margin-top: var(--spacing-lg);">Subir tarea/trabajo:</h4>
+                    <div class="file-upload" style="margin-top: var(--spacing-md);">
+                        <div class="file-upload-area">
+                            <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M17 8L12 3M12 3L7 8M12 3V15"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <div class="file-upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+                            <div class="file-upload-hint">PDF, Word, PowerPoint, imágenes (Máx. 10MB)</div>
+                            <input type="file" class="file-upload-input" data-unit="unidad3" data-lesson="semana4"
+                                multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt,.zip">
+                        </div>
+                        <div class="file-list" data-unit="unidad3" data-lesson="semana4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-2xl);">
+                <a href="unidad2.html" class="btn btn-secondary">← Unidad anterior</a>
+                <a href="unidad4.html" class="btn btn-primary">Siguiente unidad →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>ERY_CURSOS</h3>
+                    <p>Innovación en sistemas y educación de calidad</p>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Navegación</h4>
+                        <ul>
+                            <li><a href="index.html">Inicio</a></li>
+                            <li><a href="courses.html">Cursos</a></li>
+                            <li><a href="contact.html">Contacto</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Unidades</h4>
+                        <ul>
+                            <li><a href="unidad1.html">Unidad I</a></li>
+                            <li><a href="unidad2.html">Unidad II</a></li>
+                            <li><a href="unidad3.html">Unidad III</a></li>
+                            <li><a href="unidad4.html">Unidad IV</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Términos de servicio</a></li>
+                            <li><a href="#">Política de privacidad</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Edwin Ramirez. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/fileUpload.js"></script>
+    <script src="js/fileViewer.js"></script>
+    <script src="js/chatbox.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard Asistente - ERY CURSOS">
+
+    <!-- Supabase Configuration -->
+    <meta name="supabase-url" content="https://ziawcvjvfpvudzkmtkba.supabase.co">
+    <meta name="supabase-key"
+        content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppYXdjdmp2ZnB2dWR6a210a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNDk4ODQsImV4cCI6MjA4MTgyNTg4NH0.tHYQ0Nqui_acDR9LdBMarqg86_HMi6szAqxRABate_o">
+
+    <title>Dashboard Asistente | ERY CURSOS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Modules -->
+    <script src="js/admin-users.js"></script>
+    <script src="js/admin-assignments.js"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="logo">ERY<span class="logo-accent">_ASSISTANT</span></h1>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Inicio</a></li>
+                <li><a href="#" class="nav-link active">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link btn-login">Cerrar Sesión</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <img src="images/upla.png" alt="UPLA Logo" class="upla-logo" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="container" style="padding-top: 100px; padding-bottom: var(--spacing-4xl);">
+        <!-- Welcome Header -->
+        <div style="margin-bottom: var(--spacing-2xl);">
+            <h1 class="hero-title" style="font-size: var(--font-size-3xl);">
+                Dashboard <span class="gradient-text">Asistente</span>
+            </h1>
+            <p class="hero-subtitle" id="welcomeText">Bienvenido, cargando...</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+            <div class="card animate-fade-in">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary);"
+                        id="totalStudents">0</div>
+                    <div style="color: var(--color-text-secondary); margin-top: var(--spacing-xs);">Estudiantes Activos
+                    </div>
+                </div>
+            </div>
+
+            <div class="card animate-fade-in animation-delay-1">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-success);"
+                        id="totalAssignments">16</div>
+                    <div style="color: var(--color-text-secondary); margin-top: var(--spacing-xs);">Asignaciones</div>
+                </div>
+            </div>
+
+            <div class="card animate-fade-in animation-delay-2">
+                <div class="card-body" style="text-align: center;">
+                    <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-warning);"
+                        id="upcomingDeadlines">0</div>
+                    <div style="color: var(--color-text-secondary); margin-top: var(--spacing-xs);">Fechas Próximas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card">
+            <div class="card-header" style="border-bottom: 1px solid var(--color-border);">
+                <div style="display: flex; gap: var(--spacing-md);">
+                    <button class="tab-btn active" data-tab="students">👥 Estudiantes</button>
+                    <button class="tab-btn" data-tab="assignments">📚 Asignaciones</button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Students Tab -->
+                <div id="students-tab" class="tab-content active">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+                        <h3>Gestión de Estudiantes</h3>
+                        <button class="btn btn-primary" id="createStudentBtn">+ Crear Estudiante</button>
+                    </div>
+
+                    <div id="studentsTable">Cargando estudiantes...</div>
+                </div>
+
+                <!-- Assignments Tab -->
+                <div id="assignments-tab" class="tab-content" style="display: none;">
+                    <h3 style="margin-bottom: var(--spacing-lg);">Gestión de Fechas Límite</h3>
+                    <div id="assignmentsTable">Cargando asignaciones...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Student Modal -->
+    <div id="createStudentModal" class="modal" style="display: none;">
+        <div class="modal-content card" style="max-width: 500px;">
+            <div class="card-header">
+                <h3 class="card-title">Crear Nuevo Estudiante</h3>
+            </div>
+            <div class="card-body">
+                <form id="createStudentForm">
+                    <div class="form-group">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" id="studentEmail" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text" id="studentName" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" id="studentPassword" class="form-input" required minlength="6">
+                    </div>
+
+                    <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                        <button type="submit" class="btn btn-primary">Crear</button>
+                        <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Deadline Modal -->
+    <div id="deadlineModal" class="modal" style="display: none;">
+        <div class="modal-content card" style="max-width: 500px;">
+            <div class="card-header">
+                <h3 class="card-title">Establecer Fecha Límite</h3>
+            </div>
+            <div class="card-body">
+                <form id="deadlineForm">
+                    <input type="hidden" id="deadlineAssignmentId">
+
+                    <div id="deadlineAssignmentInfo"
+                        style="margin-bottom: var(--spacing-md); font-weight: var(--font-weight-medium);">
+                        <!-- Will be populated -->
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Fecha y Hora Límite</label>
+                        <input type="datetime-local" id="deadlineValue" class="form-input" required>
+                    </div>
+
+                    <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                        <button type="submit" class="btn btn-primary">Guardar Fecha</button>
+                        <button type="button" class="btn btn-secondary" id="cancelDeadlineModalBtn">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .tab-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-btn:hover {
+            color: var(--color-primary);
+        }
+
+        .tab-content {
+            padding-top: var(--spacing-lg);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            margin: var(--spacing-lg);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+        }
+    </style>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let usersManager, assignmentsManager;
+        let supabase, currentUser;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for auth manager
+            while (!window.authManager) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Protect route - assistant only
+            if (!window.authManager.protectRoute('assistant')) {
+                return;
+            }
+
+            supabase = window.authManager.supabaseClient;
+            currentUser = window.authManager.getProfile();
+
+            usersManager = new AdminUsersManager(supabase);
+            assignmentsManager = new AdminAssignmentsManager(supabase);
+
+            document.getElementById('welcomeText').textContent = `Bienvenido, ${currentUser.full_name}`;
+
+            // Load data
+            await loadStats();
+            await loadStudents();
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+                    btn.classList.add('active');
+                    document.getElementById(`${tab}-tab`).style.display = 'block';
+
+                    switch (tab) {
+                        case 'students':
+                            loadStudents();
+                            break;
+                        case 'assignments':
+                            loadAssignments();
+                            break;
+                    }
+                });
+            });
+
+            // Create student modal
+            document.getElementById('createStudentBtn').addEventListener('click', () => {
+                document.getElementById('createStudentModal').style.display = 'flex';
+            });
+
+            document.getElementById('cancelModalBtn').addEventListener('click', () => {
+                document.getElementById('createStudentModal').style.display = 'none';
+            });
+
+            document.getElementById('createStudentForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createStudent();
+            });
+
+            // Deadline modal
+            document.getElementById('cancelDeadlineModalBtn').addEventListener('click', () => {
+                document.getElementById('deadlineModal').style.display = 'none';
+            });
+
+            document.getElementById('deadlineForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveDeadline();
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                await window.authManager.signOut();
+                window.location.href = 'index.html';
+            });
+        }
+
+        async function loadStats() {
+            try {
+                // Total students
+                const { count: studentCount } = await supabase
+                    .from('usuarios')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('role', 'student')
+                    .eq('active', true);
+
+                document.getElementById('totalStudents').textContent = studentCount || 0;
+
+                // Upcoming deadlines
+                const result = await assignmentsManager.getUpcomingDeadlines();
+                if (result.success) {
+                    document.getElementById('upcomingDeadlines').textContent = result.data.length;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const result = await usersManager.loadUsers({ role: 'student' });
+
+                const table = document.getElementById('studentsTable');
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    table.innerHTML = '<p>No hay estudiantes registrados.</p>';
+                    return;
+                }
+
+                table.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th>Fecha Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.data.map(user => `
+                                <tr>
+                                    <td>${user.full_name}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.active ? '<span style="color: var(--color-success)">✅ Activo</span>' : '<span style="color: var(--color-error)">❌ Inactivo</span>'}</td>
+                                    <td>${new Date(user.created_at).toLocaleDateString('es-ES')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+
+        async function createStudent() {
+            const email = document.getElementById('studentEmail').value.trim();
+            const name = document.getElementById('studentName').value.trim();
+            const password = document.getElementById('studentPassword').value;
+
+            if (!email || !name || !password) {
+                alert('Por favor, completa todos los campos');
+                return;
+            }
+
+            try {
+                const result = await window.authManager.createUser(email, password, name, 'student');
+
+                if (result.success) {
+                    alert('✓ Estudiante creado exitosamente');
+                    document.getElementById('createStudentModal').style.display = 'none';
+                    document.getElementById('createStudentForm').reset();
+                    await loadStudents();
+                    await loadStats();
+                } else {
+                    alert('✗ Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error creating student:', error);
+                alert('✗ Error al crear estudiante');
+            }
+        }
+
+        async function loadAssignments() {
+            try {
+                const result = await assignmentsManager.loadAssignmentsWithDeadlines();
+
+                const table = document.getElementById('assignmentsTable');
+
+                const statusColors = {
+                    'no-deadline': 'var(--color-text-secondary)',
+                    'active': 'var(--color-success)',
+                    'upcoming': 'var(--color-warning)',
+                    'overdue': 'var(--color-error)'
+                };
+
+                const statusLabels = {
+                    'no-deadline': '⚪ Sin fecha',
+                    'active': '✅ Activa',
+                    'upcoming': '⚠️ Próxima',
+                    'overdue': '❌ Vencida'
+                };
+
+                table.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Unidad</th>
+                                <th>Semana</th>
+                                <th>Título</th>
+                                <th>Fecha Límite</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.data.map(assignment => `
+                                <tr>
+                                    <td>Unidad ${assignment.units.unit_number}</td>
+                                    <td>Semana ${assignment.week_number}</td>
+                                    <td>${assignment.title}</td>
+                                    <td>${assignment.deadline ? new Date(assignment.deadline).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+                                    <td><span style="color: ${statusColors[assignment.status]}">${statusLabels[assignment.status]}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="editDeadline('${assignment.id}', '${assignment.title}', '${assignment.deadline || ''}')">
+                                            📅 ${assignment.deadline ? 'Ed itar' : 'Establecer'}
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+            }
+        }
+
+        async function editDeadline(assignmentId, title, currentDeadline) {
+            document.getElementById('deadlineAssignmentId').value = assignmentId;
+            document.getElementById('deadlineAssignmentInfo').textContent = title;
+
+            if (currentDeadline) {
+                const date = new Date(currentDeadline);
+                const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                document.getElementById('deadlineValue').value = localDate.toISOString().slice(0, 16);
+            } else {
+                document.getElementById('deadlineValue').value = '';
+            }
+
+            document.getElementById('deadlineModal').style.display = 'flex';
+        }
+
+        async function saveDeadline() {
+            const assignmentId = document.getElementById('deadlineAssignmentId').value;
+            const deadline = document.getElementById('deadlineValue').value;
+
+            if (!deadline) {
+                alert('Por favor, selecciona una fecha');
+                return;
+            }
+
+            const result = await assignmentsManager.updateDeadline(assignmentId, new Date(deadline).toISOString());
+
+            if (result.success) {
+                alert('✓ Fecha límite actualizada');
+                document.getElementById('deadlineModal').style.display = 'none';
+                await loadAssignments();
+            } else {
+                alert('✗ Error: ' + result.error);
+            }
+        }
+
+        // Make function accessible globally
+        window.editDeadline = editDeadline;
+    </script>
+</body>
+
+</html>
