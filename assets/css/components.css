@@ -1,46 +1,87 @@
 /* ===================================
-   BUTTONS - Apple Style
+   BUTTONS
    =================================== */
 .btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: var(--spacing-sm);
-    padding: 12px 24px; /* Proporciones de Apple */
+    padding: var(--spacing-md) var(--spacing-xl);
     font-family: var(--font-primary);
     font-size: var(--font-size-base);
-    font-weight: 500;
+    font-weight: var(--font-weight-semibold);
     text-align: center;
     border: none;
-    border-radius: 12px; /* Bordes más redondeados */
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Animación más natural */
+    transition: all var(--transition-base);
     text-decoration: none;
 }
 
 .btn:hover {
-    transform: scale(1.02); /* Crece sutilmente en lugar de subir */
-    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn:active {
-    transform: scale(0.98); /* Efecto de presión física */
+    transform: translateY(0);
 }
 
 .btn-primary {
-    background: #0071e3; /* Azul Apple */
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--color-primary-dark), var(--color-secondary));
     color: white;
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.1); /* Botón traslúcido */
-    color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 2px solid var(--color-border);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--color-primary);
+    background: var(--color-bg-tertiary);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+}
+
+.btn-outline:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+}
+
+.btn-sm {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+.btn-lg {
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    font-size: var(--font-size-lg);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
 }
 
 /* ===================================
@@ -87,20 +128,100 @@
 }
 
 /* ===================================
-   CARDS - Minimalist
+   UNIT CARDS
    =================================== */
-.card {
-    background: #1d1d1f; /* Gris muy oscuro casi negro */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px; /* Esquinas más suaves */
-    padding: var(--spacing-2xl);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    transition: all 0.4s ease;
+.units-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+.unit-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    text-decoration: none;
+    color: var(--color-text);
+    overflow: hidden;
+    transition: all var(--transition-base);
+}
+
+.unit-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.unit-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.unit-card:hover::before {
+    opacity: 0.05;
+}
+
+.unit-icon {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-lg);
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.unit-content {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.unit-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-xs);
+}
+
+.unit-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.unit-meta {
+    display: flex;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+.unit-arrow {
+    flex-shrink: 0;
+    font-size: var(--font-size-2xl);
+    color: var(--color-primary);
+    transition: transform var(--transition-base);
+    position: relative;
+    z-index: 1;
+}
+
+.unit-card:hover .unit-arrow {
+    transform: translateX(5px);
 }
 
 /* ===================================
@@ -157,21 +278,58 @@
 }
 
 /* ===================================
-   FORMS - Modern Input
+   FORMS
    =================================== */
-.form-input {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 10px !important;
-    color: white !important;
-    padding: 14px !important;
+.form-group {
+    margin-bottom: var(--spacing-lg);
 }
 
-.form-input:focus {
-    border-color: #0071e3 !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2) !important;
+.form-label {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
 }
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    padding: var(--spacing-md);
+    font-family: var(--font-primary);
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(106, 90, 255, 0.1);
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-error {
+    font-size: var(--font-size-sm);
+    color: var(--color-error);
+    margin-top: var(--spacing-xs);
+}
+
+.form-helper {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+    margin-top: var(--spacing-xs);
+}
+
 /* ===================================
    PROGRESS BARS
    =================================== */
