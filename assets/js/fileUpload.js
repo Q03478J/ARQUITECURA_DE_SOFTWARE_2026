@@ -142,9 +142,7 @@ class FileUploadManager {
                             <small style="font-size: 0.7rem; color: #666;">${new Date(file.upload_date).toLocaleDateString()}</small>
                         </div>
                     </div>
-                    <button onclick="window.fileUploadManager.deleteFile('${file.id}')" style="background: none; border: none; color: #ff4d4d; cursor: pointer; padding: 5px;" title="Eliminar entrega">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
+                    
                 </div>
             `).join('');
         });
