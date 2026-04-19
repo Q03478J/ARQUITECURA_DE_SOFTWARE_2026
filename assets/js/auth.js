@@ -13,8 +13,8 @@ class AuthManager {
     }
 
     async init() {
-        const url = document.querySelector('meta[name="supabase-url"]')?.content;
-        const key = document.querySelector('meta[name="supabase-key"]')?.content;
+        const url = document.querySelector('meta[name="https://kjspmefhcobwrtgtalsc.supabase.co"]')?.content;
+        const key = document.querySelector('meta[name="sb_publishable_A_sZ2eTfnp2a5zlt6XIqkg_mRudHh7J"]')?.content;
 
         if (!url || !key || !window.supabase) {
             console.error('❌ Configuración de Supabase no encontrada');
