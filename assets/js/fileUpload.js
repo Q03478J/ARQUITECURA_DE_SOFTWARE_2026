@@ -4,39 +4,33 @@
 // ===================================
 
 class FileUploadManager {
-    constructor(supabaseUrl = null, supabaseKey = null) {
-        this.supabaseUrl = supabaseUrl;
-        this.supabaseKey = supabaseKey;
+    constructor() {
         this.supabaseClient = null;
         this.maxFileSize = 10 * 1024 * 1024; // 10MB
         this.uploadedFiles = [];
-        this.init();
+        // Esperar a que auth.js inicialice primero
+        this.waitForAuth();
     }
 
-    async init() {
-        this.initSupabase();
-
-        if (this.supabaseClient) {
-            await this.loadFilesFromSupabase();
-        } else {
-            this.uploadedFiles = this.loadFromStorage();
-        }
-
-        this.setupEventListeners();
-        this.renderUploadedFiles();
+    // ✅ SOLUCIÓN: espera a que ERY.auth esté listo y reutiliza SU cliente
+    waitForAuth() {
+        const tryInit = async () => {
+            if (window.ERY?.auth?.supabaseClient) {
+                // Reutilizar el cliente ya creado por auth.js (evita duplicados)
+                this.supabaseClient = window.ERY.auth.supabaseClient;
+                console.log('✅ FileUpload: usando cliente Supabase de auth.js');
+                await this.loadFilesFromSupabase();
+                this.setupEventListeners();
+                this.renderUploadedFiles();
+            } else {
+                // auth.js aún no está listo, reintentar en 300ms
+                setTimeout(tryInit, 300);
+            }
+        };
+        tryInit();
     }
 
-    initSupabase() {
-        if (this.supabaseUrl && this.supabaseKey && window.supabase) {
-            this.supabaseClient = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
-            console.log('✅ Supabase conectado correctamente');
-            return true;
-        }
-        console.error('❌ Supabase no pudo inicializarse');
-        return false;
-    }
-
-    // ✅ Detecta si hay sesión iniciada usando tu AuthManager (ERY.auth)
+    // ✅ Detecta sesión usando el auth de ERY
     isLoggedIn() {
         return !!(window.ERY?.auth?.currentUser);
     }
@@ -58,14 +52,13 @@ class FileUploadManager {
     }
 
     async handleFiles(files, unit, lesson) {
-        // Solo usuarios con sesión pueden subir
         if (!this.isLoggedIn()) {
             this.notify('⚠️ Debes iniciar sesión para subir archivos', 'error');
             return;
         }
 
         if (!this.supabaseClient) {
-            this.notify('Error: Supabase no configurado', 'error');
+            this.notify('❌ Supabase no está listo aún, intenta de nuevo', 'error');
             return;
         }
 
@@ -128,7 +121,6 @@ class FileUploadManager {
     }
 
     renderUploadedFiles() {
-        // ✅ Verifica sesión en cada render
         const loggedIn = this.isLoggedIn();
 
         document.querySelectorAll('.file-list').forEach(container => {
@@ -154,9 +146,7 @@ class FileUploadManager {
                             </small>
                         </div>
                     </div>
-
                     ${loggedIn ? `
-                        <!-- SESIÓN INICIADA: botón eliminar -->
                         <button onclick="window.fileUploadManager.deleteFile('${file.id}')"
                             title="Eliminar entrega"
                             style="background: none; border: none; color: #ff4d4d; cursor: pointer; padding: 5px;">
@@ -165,9 +155,7 @@ class FileUploadManager {
                             </svg>
                         </button>
                     ` : `
-                        <!-- MODO INVITADO: solo icono de descarga -->
-                        <a href="${file.url}" target="_blank" download
-                           title="Descargar archivo"
+                        <a href="${file.url}" target="_blank" download title="Descargar"
                            style="color: #888; padding: 5px; display: flex; align-items: center;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -180,11 +168,9 @@ class FileUploadManager {
             `).join('');
         });
 
-        // ✅ Ocultar zona de subida si es invitado
         this.toggleUploadAreas(loggedIn);
     }
 
-    // ✅ Muestra u oculta las zonas de subida según sesión
     toggleUploadAreas(loggedIn) {
         document.querySelectorAll('.file-upload-area').forEach(area => {
             area.style.display = loggedIn ? '' : 'none';
@@ -196,17 +182,10 @@ class FileUploadManager {
             this.notify('⚠️ Debes iniciar sesión para eliminar archivos', 'error');
             return;
         }
-
         if (!confirm('¿Deseas eliminar esta entrega?')) return;
-
         try {
-            if (this.supabaseClient) {
-                const { error } = await this.supabaseClient
-                    .from('files')
-                    .delete()
-                    .eq('id', id);
-                if (error) throw error;
-            }
+            const { error } = await this.supabaseClient.from('files').delete().eq('id', id);
+            if (error) throw error;
             this.uploadedFiles = this.uploadedFiles.filter(f => f.id != id);
             this.saveToStorage();
             this.renderUploadedFiles();
@@ -251,7 +230,7 @@ class FileUploadManager {
             });
         });
 
-        // ✅ Re-renderizar cuando cambia autenticación
+        // Re-renderizar cuando cambia la sesión
         document.addEventListener('authStateChanged', () => {
             this.renderUploadedFiles();
         });
@@ -313,15 +292,8 @@ class FileUploadManager {
 }
 
 // ===================================
-// INICIALIZACIÓN AUTOMÁTICA
+// INICIALIZACIÓN — Sin crear nuevo cliente Supabase
 // ===================================
 document.addEventListener('DOMContentLoaded', () => {
-    const url = document.querySelector('meta[name="supabase-url"]')?.content;
-    const key = document.querySelector('meta[name="supabase-key"]')?.content;
-
-    if (url && key) {
-        window.fileUploadManager = new FileUploadManager(url, key);
-    } else {
-        console.error('❌ No se encontraron credenciales de Supabase en los meta tags.');
-    }
+    window.fileUploadManager = new FileUploadManager();
 });
