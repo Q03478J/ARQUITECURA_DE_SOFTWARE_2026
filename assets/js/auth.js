@@ -9,12 +9,12 @@ class AuthManager {
         this.currentUser = null;
         this.currentProfile = null;
         this.ADMIN_EMAIL = 'dobleeimportaciones@gmail.com';
-        this.init();
+        // ✅ NO llamar init() aquí — se llama manualmente abajo
     }
 
     async init() {
-        const url = document.querySelector('meta[name="https://kjspmefhcobwrtgtalsc.supabase.co"]')?.content;
-        const key = document.querySelector('meta[name="sb_publishable_A_sZ2eTfnp2a5zlt6XIqkg_mRudHh7J"]')?.content;
+        const url = document.querySelector('meta[name="supabase-url"]')?.content;
+        const key = document.querySelector('meta[name="supabase-key"]')?.content;
 
         if (!url || !key || !window.supabase) {
             console.error('❌ Configuración de Supabase no encontrada');
@@ -24,22 +24,19 @@ class AuthManager {
         try {
             this.supabaseClient = window.supabase.createClient(url, key);
 
-            // ✅ CAMBIO 1: Exponer this en window.ERY.auth INMEDIATAMENTE
-            // para que fileUpload.js pueda reutilizar supabaseClient
-            window.ERY = window.ERY || {};
+            // ✅ Exponer DESPUÉS de crear el cliente
             window.ERY.auth = this;
+            console.log('✅ Auth: cliente Supabase listo');
 
-            // Verificar sesión actual al cargar
             await this.checkSession();
 
-            // Escuchar cambios de estado (Login/Logout)
             this.supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 if (event === 'SIGNED_IN') {
                     await this.handleSignIn(session);
                 } else if (event === 'SIGNED_OUT') {
                     this.handleSignOut();
                 }
-                // ✅ CAMBIO 2: Notificar a fileUpload.js cuando cambia la sesión
+                // ✅ Notificar a fileUpload.js
                 document.dispatchEvent(new Event('authStateChanged'));
             });
 
@@ -50,13 +47,24 @@ class AuthManager {
         }
     }
 
+    async handleSignIn(session) {
+        this.currentUser = session.user;
+        await this.loadUserProfile();
+        document.dispatchEvent(new Event('authStateChanged'));
+    }
+
+    handleSignOut() {
+        this.currentUser = null;
+        this.currentProfile = null;
+        document.dispatchEvent(new Event('authStateChanged'));
+    }
+
     // --- SESIÓN Y PERFIL ---
     async checkSession() {
         const { data: { session } } = await this.supabaseClient.auth.getSession();
         if (session) {
             this.currentUser = session.user;
             await this.loadUserProfile();
-            // ✅ Notificar también al verificar sesión inicial
             document.dispatchEvent(new Event('authStateChanged'));
             return true;
         }
@@ -86,7 +94,6 @@ class AuthManager {
         try {
             const { data, error } = await this.supabaseClient.auth.signInWithPassword({ email, password });
             if (error) throw error;
-            
             await this.logAudit('SIGN_IN', 'auth');
             return { success: true };
         } catch (error) {
@@ -145,7 +152,6 @@ class AuthManager {
             window.location.href = 'login.html';
             return false;
         }
-
         if (requiredRole && this.currentProfile?.role !== requiredRole && !this.isAdmin()) {
             this.redirectToDashboard();
             return false;
@@ -180,9 +186,9 @@ class AuthManager {
     }
 }
 
-// ✅ Globalización — ya no llamamos init() dos veces
-document.addEventListener('DOMContentLoaded', () => {
+// ✅ Una sola inicialización, sin doble llamada
+document.addEventListener('DOMContentLoaded', async () => {
     window.ERY = window.ERY || {};
-    window.ERY.auth = new AuthManager();
-    // init() se llama automáticamente en el constructor
+    const auth = new AuthManager();
+    await auth.init(); // init() aquí, no en el constructor
 });
