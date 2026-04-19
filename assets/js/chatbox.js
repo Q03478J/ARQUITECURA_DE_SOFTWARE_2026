@@ -10,8 +10,8 @@ class CoronelChatbox {
             'hola': '¡Hola! Soy CORONEL BOT, tu asistente virtual. ¿En qué puedo ayudarte?',
             'ayuda': 'Puedo ayudarte con: \n• Información sobre las unidades del curso\n• Navegación por la plataforma\n• Dudas sobre tareas y fechas límite\n• Cómo subir archivos\n• Ver tu progreso\n• Contacto con el profesor',
             'unidades': 'El curso tiene 4 unidades:\n1. Fundamentos de Arquitectura SW\n2. Patrones Arquitectónicos\n3. Diseño y Modelado\n4. Evaluación y Optimización',
-            'contacto': 'Puedes contactar a CORONEL GUEVARA:\n📧 q03478j@uppla.edu.pe\n📱 +51 927125942',
-            'default': 'Interesante pregunta. Para más información, contáctanos en q03478j@uppla.edu.pe o visita la sección de contacto.'
+            'contacto': 'Puedes contactar a CORONEL GUEVARA:\n📧 q03478j@upla.edu.pe\n📱 +51 927125942',
+            'default': 'Interesante pregunta. Para más información, contáctanos en q03478j@upla.edu.pe o visita la sección de contacto.'
         };
         this.init();
     }
@@ -39,7 +39,10 @@ class CoronelChatbox {
                     <div class="chat-header">
                         <div class="chat-header-info">
                             <div class="chat-avatar">
-                                <img src="images/coronel.jpg" alt="CORONEL" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.src='https://ui-avatars.com/api/?name=Coronel+Bot&background=0D8ABC&color=fff'">
+                                <!-- ✅ Imagen corregida: usa avatar online, sin errores 404 -->
+                                <img src="https://ui-avatars.com/api/?name=Coronel+Bot&background=0D8ABC&color=fff&size=128"
+                                     alt="CORONEL"
+                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div>
                                 <h4>CORONEL BOT</h4>
@@ -92,7 +95,6 @@ class CoronelChatbox {
             if (e.key === 'Enter') this.sendMessage();
         });
 
-        // Quick replies
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('quick-reply')) {
                 const message = e.target.dataset.message;
@@ -184,8 +186,6 @@ class CoronelChatbox {
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     window.coronelChatbox = new CoronelChatbox();
-
-    // Exportar al namespace global (opcional)
     window.CORONEL = window.CORONEL || {};
     window.CORONEL.chatbox = window.coronelChatbox;
 });
