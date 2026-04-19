@@ -23,7 +23,12 @@ class AuthManager {
 
         try {
             this.supabaseClient = window.supabase.createClient(url, key);
-            
+
+            // ✅ CAMBIO 1: Exponer this en window.ERY.auth INMEDIATAMENTE
+            // para que fileUpload.js pueda reutilizar supabaseClient
+            window.ERY = window.ERY || {};
+            window.ERY.auth = this;
+
             // Verificar sesión actual al cargar
             await this.checkSession();
 
@@ -34,6 +39,8 @@ class AuthManager {
                 } else if (event === 'SIGNED_OUT') {
                     this.handleSignOut();
                 }
+                // ✅ CAMBIO 2: Notificar a fileUpload.js cuando cambia la sesión
+                document.dispatchEvent(new Event('authStateChanged'));
             });
 
             return true;
@@ -49,6 +56,8 @@ class AuthManager {
         if (session) {
             this.currentUser = session.user;
             await this.loadUserProfile();
+            // ✅ Notificar también al verificar sesión inicial
+            document.dispatchEvent(new Event('authStateChanged'));
             return true;
         }
         return false;
@@ -87,7 +96,6 @@ class AuthManager {
 
     async signUp(email, password, fullName, role = 'student') {
         try {
-            // Guardar sesión de Admin antes de crear al alumno
             const { data: { session: adminSession } } = await this.supabaseClient.auth.getSession();
 
             const { data: authData, error: authError } = await this.supabaseClient.auth.signUp({
@@ -98,12 +106,10 @@ class AuthManager {
 
             if (authError) throw authError;
 
-            // Restaurar sesión del Admin inmediatamente
             if (adminSession) {
                 await this.supabaseClient.auth.setSession(adminSession);
             }
 
-            // Crear perfil en la tabla de usuarios
             const { error: profileError } = await this.supabaseClient
                 .from('usuarios')
                 .insert([{
@@ -170,13 +176,13 @@ class AuthManager {
                 ip_address: ip,
                 user_agent: navigator.userAgent
             }]);
-        } catch (e) { /* Silencioso para no interrumpir el flujo principal */ }
+        } catch (e) { /* Silencioso */ }
     }
 }
 
-// Globalización
-document.addEventListener('DOMContentLoaded', async () => {
+// ✅ Globalización — ya no llamamos init() dos veces
+document.addEventListener('DOMContentLoaded', () => {
     window.ERY = window.ERY || {};
     window.ERY.auth = new AuthManager();
-    await window.ERY.auth.init();
+    // init() se llama automáticamente en el constructor
 });
