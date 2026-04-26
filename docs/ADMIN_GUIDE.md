@@ -1,4 +1,4 @@
-# Guía del Administrador - ERY CURSOS
+# Guía del Administrador - CORONNEL_GUEVARA
 
 ## Introducción
 
@@ -8,8 +8,8 @@ Esta guía explica cómo usar todas las funcionalidades del dashboard de adminis
 
 1. Ir a `login.html`
 2. Ingresar con credenciales de administrador:
-   - Email: `dobleeimportaciones@gmail.com`
-   - Password: Tu contraseña configurada
+   - Email: `q03489j@upla.edu.pe`
+   - Password: Jimelda964272749
 3. Serás redirigido automáticamente al Dashboard Administrador
 
 ---
