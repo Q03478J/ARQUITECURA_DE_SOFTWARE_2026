@@ -1,318 +1,371 @@
-/* ===================================
-   BACKGROUND INTERACTIVO v2 — IGLOO STYLE
-   Más grueso · Más luminoso · Ripple en clic
-   assets/js/background.js
-   =================================== */
-class InteractiveBackground {
-    constructor() {
-        this.canvas     = null;
-        this.ctx        = null;
-        this.particles  = [];
-        this.mouse      = { x: -9999, y: -9999 };
-        this.mouseSpeed = 0;
-        this.ripples    = [];
-        this.animFrame  = null;
-        this.isLight    = false;
-        this.tick       = 0;
-        this.init();
+/* =====================================================
+   INTERACTIVE BACKGROUND v3 — CORONEL GUEVARA 2026
+   ✅ Líneas MUY gruesas y luminosas
+   ✅ Funciona en TODAS las páginas
+   ✅ Botones se agrandan al hacer clic (ripple + scale)
+   ✅ Supabase intacto — sólo visual
+   ===================================================== */
+(function () {
+    'use strict';
+
+    /* ── CONFIG ── */
+    var CFG = {
+        MAX_P  : 140,   DIVISOR : 7000,
+        CD     : 170,   MD      : 280,
+        LW_PP  : 2.4,   LW_M    : 3.5,
+        LA_PP  : 0.75,  LA_M    : 0.95,
+        PUSH_R : 240,   PUSH_F  : 110,
+        SPOT_R : 460,   SPOT_A  : 0.18,
+        CR1    : 44,    CR2     : 18,   CDOT : 7,   CA : 0.85,
+        RIP_R  : 180,   RIP_SPD : 7,
+    };
+
+    /* ── CLASE ── */
+    function BG() {
+        this.canvas    = null;
+        this.ctx       = null;
+        this.P         = [];
+        this.rips      = [];
+        this.mx = -9999; this.my = -9999; this.spd = 0; this.px = 0; this.py = 0;
+        this.isLight   = false;
+        this.raf       = null;
+        this._init();
     }
 
-    init() {
-        this.canvas = document.createElement('canvas');
-        this.canvas.id = 'bg-canvas';
-        Object.assign(this.canvas.style, {
-            position: 'fixed', top: '0', left: '0',
-            width: '100%', height: '100%',
-            pointerEvents: 'none', zIndex: '0',
-        });
-        document.body.insertBefore(this.canvas, document.body.firstChild);
-        this.ctx = this.canvas.getContext('2d');
-        this.resize();
-        this.createParticles();
-        this.bindEvents();
-        this.loop();
-    }
+    BG.prototype._init = function () {
+        var c = document.createElement('canvas');
+        c.id = 'bg-canvas';
+        c.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;';
+        document.body.insertBefore(c, document.body.firstChild);
+        this.canvas = c;
+        this.ctx    = c.getContext('2d');
+        this._resize();
+        this._spawn();
+        this._bind();
+        this._patchButtons();
+        this._loop();
+    };
 
-    resize() {
-        this.canvas.width  = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        this.W = this.canvas.width;
-        this.H = this.canvas.height;
-    }
+    BG.prototype._resize = function () {
+        this.canvas.width  = this.W = window.innerWidth;
+        this.canvas.height = this.H = window.innerHeight;
+    };
 
-    createParticles() {
-        this.particles = [];
-        const count = Math.min(Math.floor((this.W * this.H) / 8000), 130);
-        for (let i = 0; i < count; i++) this.particles.push(this.makeParticle());
-    }
+    BG.prototype._spawn = function () {
+        this.P = [];
+        var n = Math.min(Math.floor(this.W * this.H / CFG.DIVISOR), CFG.MAX_P);
+        for (var i = 0; i < n; i++) this.P.push(this._newP());
+    };
 
-    makeParticle() {
+    BG.prototype._newP = function () {
         return {
-            x: Math.random() * this.W,
-            y: Math.random() * this.H,
+            x: Math.random() * this.W, y: Math.random() * this.H,
             ox: 0, oy: 0,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            size:       1 + Math.random() * 3,
-            baseAlpha:  0.35 + Math.random() * 0.45,
-            alpha:      0.4,
-            pulse:      Math.random() * Math.PI * 2,
-            pulseSpeed: 0.015 + Math.random() * 0.02,
-            hue:        Math.random() > 0.85 ? 'cyan' : 'lime',
+            vx: (Math.random() - 0.5) * 0.55, vy: (Math.random() - 0.5) * 0.55,
+            sz: 1.2 + Math.random() * 2.8,
+            ba: 0.38 + Math.random() * 0.42, a: 0.4,
+            ph: Math.random() * Math.PI * 2, ps: 0.014 + Math.random() * 0.018,
+            cy: Math.random() > 0.8,
         };
-    }
+    };
 
-    bindEvents() {
-        window.addEventListener('resize', () => { this.resize(); this.createParticles(); });
+    BG.prototype._lime = function (a) {
+        var c = this.isLight ? '58,122,0' : '200,240,74';
+        return 'rgba(' + c + ',' + Math.min(1, Math.max(0, a)) + ')';
+    };
+    BG.prototype._cyan = function (a) {
+        var c = this.isLight ? '0,120,60' : '80,255,180';
+        return 'rgba(' + c + ',' + Math.min(1, Math.max(0, a)) + ')';
+    };
+    BG.prototype._col = function (p, a) { return p.cy ? this._cyan(a) : this._lime(a); };
 
-        window.addEventListener('mousemove', (e) => {
-            const dx = e.clientX - this.mouse.x;
-            const dy = e.clientY - this.mouse.y;
-            this.mouseSpeed = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
-            this.mouse.x = e.clientX;
-            this.mouse.y = e.clientY;
+    BG.prototype._bind = function () {
+        var self = this;
+        window.addEventListener('resize', function () { self._resize(); self._spawn(); });
+
+        window.addEventListener('mousemove', function (e) {
+            var dx = e.clientX - self.px, dy = e.clientY - self.py;
+            self.spd = Math.min(Math.sqrt(dx*dx+dy*dy), 50);
+            self.px  = self.mx; self.py = self.my;
+            self.mx  = e.clientX; self.my = e.clientY;
+        });
+        window.addEventListener('mouseleave', function () { self.mx = self.my = -9999; self.spd = 0; });
+        window.addEventListener('click', function (e) {
+            self.rips.push({ x: e.clientX, y: e.clientY, r: 0, maxR: CFG.RIP_R, a: 1, spd: CFG.RIP_SPD });
         });
 
-        window.addEventListener('mouseleave', () => {
-            this.mouse.x = -9999; this.mouse.y = -9999; this.mouseSpeed = 0;
-        });
-
-        // CLIC → onda de expansión
-        window.addEventListener('click', (e) => {
-            this.ripples.push({ x: e.clientX, y: e.clientY, r: 0, maxR: 160, alpha: 0.9, speed: 6 });
-        });
-
-        const obs = new MutationObserver(() => {
-            this.isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        var obs = new MutationObserver(function () {
+            self.isLight = document.documentElement.getAttribute('data-theme') === 'light';
         });
         obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
         this.isLight = document.documentElement.getAttribute('data-theme') === 'light';
-    }
+    };
 
-    get C()     { return this.isLight ? {r:58,g:122,b:0}    : {r:200,g:240,b:74};  }
-    get Ccyan() { return this.isLight ? {r:0,g:140,b:80}     : {r:100,g:255,b:180}; }
-    rgb(c, a)   { return `rgba(${c.r},${c.g},${c.b},${a})`; }
-    lime(a)     { return this.rgb(this.C, a);     }
-    cyan(a)     { return this.rgb(this.Ccyan, a); }
+    /* ─── BOTONES: SCALE + RIPPLE ─── */
+    BG.prototype._patchButtons = function () {
+        var self = this;
 
-    loop() {
-        this.tick++;
-        this.update();
-        this.draw();
-        this.animFrame = requestAnimationFrame(() => this.loop());
-    }
+        /* Inyectar estilos globales UNA sola vez */
+        if (!document.getElementById('bg-styles')) {
+            var st = document.createElement('style');
+            st.id  = 'bg-styles';
+            st.textContent = [
+                /* Ripple de tinta en botones */
+                '@keyframes _btnRip { to { transform:scale(2.5); opacity:0; } }',
 
-    update() {
-        const mx = this.mouse.x, my = this.mouse.y;
-        const RADIUS = 220, PUSH = 100, RETURN = 0.055;
+                /* Nav links hover luminoso */
+                '.nav-link {',
+                '  transition: color .2s ease, text-shadow .2s ease, transform .15s ease !important;',
+                '}',
+                '.nav-link:hover {',
+                '  color: var(--color-primary) !important;',
+                '  text-shadow: 0 0 14px rgba(200,240,74,.85), 0 0 36px rgba(200,240,74,.4) !important;',
+                '  transform: translateY(-2px) !important;',
+                '}',
+                '[data-theme=light] .nav-link:hover {',
+                '  text-shadow: 0 0 12px rgba(58,122,0,.6), 0 0 28px rgba(58,122,0,.25) !important;',
+                '}',
+                '.nav-link.active::after { transform: scaleX(1) !important; }',
 
-        for (const p of this.particles) {
+                /* Btn-login pulso suave */
+                '.btn-login { animation: _loginPulse 3s ease-in-out infinite !important; }',
+                '@keyframes _loginPulse {',
+                '  0%,100% { box-shadow: 0 0 0 0 rgba(200,240,74,0); }',
+                '  50%     { box-shadow: 0 0 18px 5px rgba(200,240,74,.38); }',
+                '}',
+                '[data-theme=light] .btn-login { animation: _loginPulseL 3s ease-in-out infinite !important; }',
+                '@keyframes _loginPulseL {',
+                '  0%,100% { box-shadow: 0 0 0 0 rgba(58,122,0,0); }',
+                '  50%     { box-shadow: 0 0 16px 4px rgba(58,122,0,.28); }',
+                '}',
+            ].join('\n');
+            document.head.appendChild(st);
+        }
+
+        function patch(el) {
+            if (!el || el._bgP) return;
+            el._bgP = true;
+            var cs = getComputedStyle(el);
+            if (cs.position === 'static') el.style.position = 'relative';
+            el.style.overflow = 'hidden';
+
+            el.addEventListener('mousedown', function () {
+                el.style.transition = 'transform .12s cubic-bezier(.4,0,.2,1), box-shadow .12s ease';
+                el.style.transform  = 'scale(0.93)';
+            });
+            el.addEventListener('mouseup', function () {
+                el.style.transform  = 'scale(1.08)';
+                el.style.boxShadow  = '0 0 32px 8px rgba(200,240,74,.55)';
+                setTimeout(function () { el.style.transform = 'scale(1)'; el.style.boxShadow = ''; }, 240);
+            });
+            el.addEventListener('mouseleave', function () {
+                el.style.transform  = 'scale(1)';
+                el.style.boxShadow  = '';
+            });
+
+            /* Ripple de tinta */
+            el.addEventListener('click', function (e) {
+                var rect = el.getBoundingClientRect();
+                var ink  = document.createElement('span');
+                var d    = Math.max(rect.width, rect.height) * 2.2;
+                ink.style.cssText = [
+                    'position:absolute',
+                    'border-radius:50%',
+                    'width:' + d + 'px',
+                    'height:' + d + 'px',
+                    'left:' + (e.clientX - rect.left - d / 2) + 'px',
+                    'top:'  + (e.clientY - rect.top  - d / 2) + 'px',
+                    'background:rgba(200,240,74,.30)',
+                    'transform:scale(0)',
+                    'animation:_btnRip .6s ease-out forwards',
+                    'pointer-events:none',
+                    'z-index:99',
+                ].join(';');
+                el.appendChild(ink);
+                setTimeout(function () { ink.remove(); }, 650);
+            });
+        }
+
+        /* Patch inmediato */
+        document.querySelectorAll('button,.btn,.nav-link,.btn-login,.unit-card,.stat-card').forEach(patch);
+
+        /* Patch para elementos añadidos por Supabase / JS */
+        var mo = new MutationObserver(function (muts) {
+            muts.forEach(function (m) {
+                m.addedNodes.forEach(function (node) {
+                    if (node.nodeType !== 1) return;
+                    if (node.matches && node.matches('button,.btn,.nav-link,.btn-login')) patch(node);
+                    if (node.querySelectorAll) node.querySelectorAll('button,.btn,.nav-link,.btn-login').forEach(patch);
+                });
+            });
+        });
+        mo.observe(document.body, { childList: true, subtree: true });
+    };
+
+    /* ─── LOOP ─── */
+    BG.prototype._loop = function () {
+        this._update();
+        this._draw();
+        var self = this;
+        this.raf = requestAnimationFrame(function () { self._loop(); });
+    };
+
+    BG.prototype._update = function () {
+        var mx = this.mx, my = this.my, sp = this.spd;
+        for (var i = 0; i < this.P.length; i++) {
+            var p = this.P[i];
             p.x += p.vx; p.y += p.vy;
             if (p.x < 0 || p.x > this.W) p.vx *= -1;
             if (p.y < 0 || p.y > this.H) p.vy *= -1;
             p.x = Math.max(0, Math.min(this.W, p.x));
             p.y = Math.max(0, Math.min(this.H, p.y));
+            p.ph += p.ps;
+            p.a   = p.ba + Math.sin(p.ph) * 0.18;
 
-            p.pulse += p.pulseSpeed;
-            p.alpha  = p.baseAlpha + Math.sin(p.pulse) * 0.2;
-
-            const dx = p.x - mx, dy = p.y - my;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-
-            if (dist < RADIUS && dist > 0) {
-                const force  = (1 - dist / RADIUS);
-                const angle  = Math.atan2(dy, dx);
-                const boost  = 1 + this.mouseSpeed * 0.04;
-                const target = PUSH * force * force * boost;
-                p.ox += (Math.cos(angle) * target - p.ox) * 0.14;
-                p.oy += (Math.sin(angle) * target - p.oy) * 0.14;
-                p.alpha = Math.min(1, p.alpha + force * 0.5);
-            } else {
-                p.ox += (0 - p.ox) * RETURN;
-                p.oy += (0 - p.oy) * RETURN;
-            }
+            var dx = p.x - mx, dy = p.y - my;
+            var dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < CFG.PUSH_R && dist > 0) {
+                var f  = (1 - dist / CFG.PUSH_R);
+                var ag = Math.atan2(dy, dx);
+                var tg = CFG.PUSH_F * f * f * (1 + sp * 0.035);
+                p.ox += (Math.cos(ag) * tg - p.ox) * 0.15;
+                p.oy += (Math.sin(ag) * tg - p.oy) * 0.15;
+                p.a   = Math.min(1, p.a + f * 0.55);
+            } else { p.ox *= 0.945; p.oy *= 0.945; }
         }
-
-        this.ripples = this.ripples.filter(r => {
-            r.r += r.speed; r.speed *= 0.97; r.alpha *= 0.90;
-            return r.alpha > 0.01 && r.r < r.maxR + 20;
+        this.rips = this.rips.filter(function (r) {
+            r.r += r.spd; r.spd *= 0.97; r.a *= 0.91;
+            return r.a > 0.01 && r.r < r.maxR + 30;
         });
+        this.spd *= 0.87;
+    };
 
-        this.mouseSpeed *= 0.88;
-    }
+    BG.prototype._draw = function () {
+        var ctx = this.ctx, W = this.W, H = this.H;
+        var mx = this.mx, my = this.my, sp = this.spd;
+        var HAS = mx > 0 && mx < W && my > 0 && my < H;
+        ctx.clearRect(0, 0, W, H);
 
-    draw() {
-        const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.W, this.H);
+        /* SPOTLIGHT */
+        if (HAS) {
+            var sR = CFG.SPOT_R + sp * 5;
+            var sg = ctx.createRadialGradient(mx, my, 0, mx, my, sR);
+            sg.addColorStop(0,    this._lime(CFG.SPOT_A));
+            sg.addColorStop(0.3,  this._lime(CFG.SPOT_A * 0.55));
+            sg.addColorStop(0.65, this._lime(CFG.SPOT_A * 0.18));
+            sg.addColorStop(1,    this._lime(0));
+            ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
 
-        const mx = this.mouse.x, my = this.mouse.y;
-        const hasMouse = mx > 0 && mx < this.W && my > 0 && my < this.H;
-
-        /* SPOTLIGHT grande */
-        if (hasMouse) {
-            const spotR = 420 + this.mouseSpeed * 4;
-            const spot  = ctx.createRadialGradient(mx, my, 0, mx, my, spotR);
-            spot.addColorStop(0,    this.lime(0.14));
-            spot.addColorStop(0.25, this.lime(0.08));
-            spot.addColorStop(0.6,  this.lime(0.03));
-            spot.addColorStop(1,    this.lime(0));
-            ctx.fillStyle = spot;
-            ctx.fillRect(0, 0, this.W, this.H);
-
-            const halo = ctx.createRadialGradient(mx, my, 0, mx, my, 200);
-            halo.addColorStop(0,   this.cyan(0.07));
-            halo.addColorStop(1,   this.cyan(0));
-            ctx.fillStyle = halo;
-            ctx.fillRect(0, 0, this.W, this.H);
+            var hg = ctx.createRadialGradient(mx, my, 0, mx, my, 220);
+            hg.addColorStop(0, this._cyan(0.10)); hg.addColorStop(1, this._cyan(0));
+            ctx.fillStyle = hg; ctx.fillRect(0, 0, W, H);
         }
 
         /* PARTÍCULAS + LÍNEAS */
-        const CONNECT_D = 160, MOUSE_D = 260;
+        for (var i = 0; i < this.P.length; i++) {
+            var p  = this.P[i];
+            var px = p.x + p.ox, py = p.y + p.oy;
+            var dm = HAS ? Math.sqrt((px-mx)*(px-mx)+(py-my)*(py-my)) : 9999;
+            var near = dm < CFG.MD;
 
-        for (let i = 0; i < this.particles.length; i++) {
-            const p  = this.particles[i];
-            const rx = p.x + p.ox, ry = p.y + p.oy;
-            const nearMouse = hasMouse && Math.hypot(rx - mx, ry - my) < MOUSE_D;
-
-            // Líneas entre partículas — más gruesas y brillantes
-            for (let j = i + 1; j < this.particles.length; j++) {
-                const q  = this.particles[j];
-                const qx = q.x + q.ox, qy = q.y + q.oy;
-                const d  = Math.hypot(rx - qx, ry - qy);
-                if (d < CONNECT_D) {
-                    const t = 1 - d / CONNECT_D;
-                    ctx.beginPath();
-                    ctx.moveTo(rx, ry);
-                    ctx.lineTo(qx, qy);
-                    ctx.strokeStyle = this.lime(t * 0.55);
-                    ctx.lineWidth   = t * 1.8;
-                    ctx.stroke();
-                }
+            /* Líneas entre partículas */
+            for (var j = i + 1; j < this.P.length; j++) {
+                var q  = this.P[j];
+                var qx = q.x + q.ox, qy = q.y + q.oy;
+                var d  = Math.sqrt((px-qx)*(px-qx)+(py-qy)*(py-qy));
+                if (d >= CFG.CD) continue;
+                var t = 1 - d / CFG.CD;
+                ctx.lineWidth = t * CFG.LW_PP;
+                ctx.strokeStyle = this._lime(t * CFG.LA_PP);
+                ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(qx,qy); ctx.stroke();
+                /* Glow */
+                ctx.lineWidth = t * CFG.LW_PP * 3;
+                ctx.strokeStyle = this._lime(t * 0.28);
+                ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(qx,qy); ctx.stroke();
             }
 
-            // Líneas al mouse — muy gruesas y brillantes
-            if (hasMouse) {
-                const dm = Math.hypot(rx - mx, ry - my);
-                if (dm < MOUSE_D) {
-                    const t     = 1 - dm / MOUSE_D;
-                    const boost = 1 + this.mouseSpeed * 0.05;
-                    ctx.beginPath();
-                    ctx.moveTo(rx, ry);
-                    ctx.lineTo(mx, my);
-                    ctx.strokeStyle = this.lime(Math.min(0.95, t * 0.9 * boost));
-                    ctx.lineWidth   = t * 2.5 * boost;
-                    ctx.stroke();
-                }
+            /* Líneas al mouse */
+            if (HAS && near) {
+                var t2  = 1 - dm / CFG.MD;
+                var bst = 1 + sp * 0.05;
+                ctx.lineWidth = t2 * CFG.LW_M * bst;
+                ctx.strokeStyle = this._lime(Math.min(CFG.LA_M, t2 * CFG.LA_M * bst));
+                ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(mx,my); ctx.stroke();
+                ctx.lineWidth = t2 * CFG.LW_M * 3.8 * bst;
+                ctx.strokeStyle = this._lime(t2 * 0.32 * bst);
+                ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(mx,my); ctx.stroke();
             }
 
-            // Glow de partícula
-            if (p.size > 1.5 || nearMouse) {
-                const glowR = p.size * (nearMouse ? 8 : 4);
-                const gc    = p.hue === 'cyan' ? this.Ccyan : this.C;
-                const glow  = ctx.createRadialGradient(rx, ry, 0, rx, ry, glowR);
-                glow.addColorStop(0, `rgba(${gc.r},${gc.g},${gc.b},${nearMouse ? 0.5 : 0.22})`);
-                glow.addColorStop(1, `rgba(${gc.r},${gc.g},${gc.b},0)`);
-                ctx.beginPath();
-                ctx.arc(rx, ry, glowR, 0, Math.PI * 2);
-                ctx.fillStyle = glow;
-                ctx.fill();
-            }
+            /* Glow partícula */
+            var gR = p.sz * (near ? 10 : 5);
+            var gg = ctx.createRadialGradient(px,py,0,px,py,gR);
+            gg.addColorStop(0, this._col(p, near ? 0.65 : 0.28));
+            gg.addColorStop(1, this._col(p, 0));
+            ctx.beginPath(); ctx.arc(px,py,gR,0,Math.PI*2); ctx.fillStyle = gg; ctx.fill();
 
-            // Punto sólido
+            /* Punto */
             ctx.beginPath();
-            ctx.arc(rx, ry, nearMouse ? p.size * 1.6 : p.size, 0, Math.PI * 2);
-            ctx.fillStyle = p.hue === 'cyan' ? this.cyan(p.alpha) : this.lime(p.alpha);
+            ctx.arc(px, py, near ? p.sz * 1.8 : p.sz, 0, Math.PI * 2);
+            ctx.fillStyle = this._col(p, near ? Math.min(1, p.a + 0.4) : p.a);
             ctx.fill();
         }
 
-        /* CURSOR GLOW — grande y brillante */
-        if (hasMouse) {
-            const spd = this.mouseSpeed;
-
-            // Anillo exterior
-            ctx.beginPath();
-            ctx.arc(mx, my, 40 + spd * 1.2, 0, Math.PI * 2);
-            ctx.strokeStyle = this.lime(0.55 + spd * 0.01);
-            ctx.lineWidth   = 1.5;
-            ctx.stroke();
-
-            // Anillo interior
-            ctx.beginPath();
-            ctx.arc(mx, my, 16 + spd * 0.5, 0, Math.PI * 2);
-            ctx.strokeStyle = this.lime(0.8);
-            ctx.lineWidth   = 2;
-            ctx.stroke();
-
-            // Glow del punto central
-            const ptR  = 6 + spd * 0.2;
-            const ptG  = ctx.createRadialGradient(mx, my, 0, mx, my, ptR * 4);
-            ptG.addColorStop(0,   this.lime(1.0));
-            ptG.addColorStop(0.3, this.lime(0.7));
-            ptG.addColorStop(1,   this.lime(0));
-            ctx.beginPath();
-            ctx.arc(mx, my, ptR * 4, 0, Math.PI * 2);
-            ctx.fillStyle = ptG;
-            ctx.fill();
-
-            // Punto sólido central
-            ctx.beginPath();
-            ctx.arc(mx, my, ptR, 0, Math.PI * 2);
-            ctx.fillStyle = this.lime(1.0);
-            ctx.fill();
-
-            // Cruz cuando el mouse se mueve rápido
-            if (spd > 5) {
-                const cLen = 20 + spd;
-                ctx.save();
-                ctx.strokeStyle = this.lime(0.35);
-                ctx.lineWidth   = 1;
-                ctx.setLineDash([3, 5]);
+        /* CURSOR GLOW */
+        if (HAS) {
+            /* Anillo exterior grueso */
+            ctx.beginPath(); ctx.arc(mx,my,CFG.CR1+sp*1.5,0,Math.PI*2);
+            ctx.strokeStyle = this._lime(CFG.CA * 0.75); ctx.lineWidth = 2.8; ctx.stroke();
+            ctx.beginPath(); ctx.arc(mx,my,CFG.CR1+sp*1.5,0,Math.PI*2);
+            ctx.strokeStyle = this._lime(0.25); ctx.lineWidth = 12; ctx.stroke();
+            /* Anillo interior */
+            ctx.beginPath(); ctx.arc(mx,my,CFG.CR2+sp*0.6,0,Math.PI*2);
+            ctx.strokeStyle = this._lime(CFG.CA); ctx.lineWidth = 2.2; ctx.stroke();
+            /* Punto con glow */
+            var dotR = CFG.CDOT + sp * 0.25;
+            var dg = ctx.createRadialGradient(mx,my,0,mx,my,dotR*5);
+            dg.addColorStop(0, this._lime(1.0));
+            dg.addColorStop(0.3, this._lime(0.8));
+            dg.addColorStop(1, this._lime(0));
+            ctx.beginPath(); ctx.arc(mx,my,dotR*5,0,Math.PI*2); ctx.fillStyle=dg; ctx.fill();
+            ctx.beginPath(); ctx.arc(mx,my,dotR,0,Math.PI*2); ctx.fillStyle=this._lime(1); ctx.fill();
+            /* Cruz */
+            if (sp > 6) {
+                var cL = 24 + sp * 0.7;
+                ctx.save(); ctx.strokeStyle=this._lime(0.42); ctx.lineWidth=1.3;
+                ctx.setLineDash([4,6]);
                 ctx.beginPath();
-                ctx.moveTo(mx - cLen, my); ctx.lineTo(mx + cLen, my);
-                ctx.moveTo(mx, my - cLen); ctx.lineTo(mx, my + cLen);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                ctx.restore();
+                ctx.moveTo(mx-cL,my); ctx.lineTo(mx+cL,my);
+                ctx.moveTo(mx,my-cL); ctx.lineTo(mx,my+cL);
+                ctx.stroke(); ctx.setLineDash([]); ctx.restore();
             }
         }
 
-        /* RIPPLES de clic */
-        for (const rip of this.ripples) {
-            ctx.beginPath();
-            ctx.arc(rip.x, rip.y, rip.r, 0, Math.PI * 2);
-            ctx.strokeStyle = this.lime(rip.alpha * 0.9);
-            ctx.lineWidth   = 2.5 * (1 - rip.r / rip.maxR) + 0.5;
-            ctx.stroke();
-
-            if (rip.r > 12) {
-                ctx.beginPath();
-                ctx.arc(rip.x, rip.y, rip.r * 0.55, 0, Math.PI * 2);
-                ctx.strokeStyle = this.cyan(rip.alpha * 0.5);
-                ctx.lineWidth   = 1.5;
-                ctx.stroke();
+        /* RIPPLES */
+        for (var ri = 0; ri < this.rips.length; ri++) {
+            var r = this.rips[ri];
+            ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,Math.PI*2);
+            ctx.strokeStyle = this._lime(r.a * 0.95);
+            ctx.lineWidth   = 4 * (1 - r.r / r.maxR) + 0.5; ctx.stroke();
+            ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,Math.PI*2);
+            ctx.strokeStyle = this._lime(r.a * 0.3);
+            ctx.lineWidth   = 14 * (1 - r.r / r.maxR); ctx.stroke();
+            if (r.r > 15) {
+                ctx.beginPath(); ctx.arc(r.x,r.y,r.r*0.55,0,Math.PI*2);
+                ctx.strokeStyle = this._cyan(r.a * 0.7); ctx.lineWidth = 2; ctx.stroke();
             }
-
-            if (rip.r < 30) {
-                const flash = ctx.createRadialGradient(rip.x, rip.y, 0, rip.x, rip.y, 30);
-                flash.addColorStop(0, this.lime(rip.alpha * 0.6));
-                flash.addColorStop(1, this.lime(0));
-                ctx.beginPath();
-                ctx.arc(rip.x, rip.y, 30, 0, Math.PI * 2);
-                ctx.fillStyle = flash;
-                ctx.fill();
+            if (r.r < 45) {
+                var fg = ctx.createRadialGradient(r.x,r.y,0,r.x,r.y,50);
+                fg.addColorStop(0, this._lime(r.a * 0.75));
+                fg.addColorStop(1, this._lime(0));
+                ctx.beginPath(); ctx.arc(r.x,r.y,50,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
             }
         }
-    }
+    };
 
-    destroy() {
-        cancelAnimationFrame(this.animFrame);
-        if (this.canvas) this.canvas.remove();
-    }
-}
+    /* ── ARRANCAR ── */
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', function () { window._bg = new BG(); });
+    else
+        window._bg = new BG();
 
-/* Inicializar en cualquier estado del DOM */
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { window._iglooBG = new InteractiveBackground(); });
-} else {
-    window._iglooBG = new InteractiveBackground();
-}
+})();
