@@ -71,10 +71,10 @@ class FileUploadManager {
                 const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
                 const fileName = `${unit}/${lesson}/${Date.now()}_${safeName}`;
 
-                // 1. Subir al bucket 'tareas'
+                // 1. Subir al bucket 'course-uploads'
                 const { data: storageData, error: storageError } = await this.supabaseClient
                     .storage
-                    .from('tareas')
+                    .from('course-uploads')
                     .upload(fileName, file, {
                         cacheControl: '3600',
                         upsert: false
@@ -85,7 +85,7 @@ class FileUploadManager {
                 // 2. Obtener URL pública
                 const { data: urlData } = this.supabaseClient
                     .storage
-                    .from('tareas')
+                    .from('course-uploads')
                     .getPublicUrl(fileName);
 
                 const fileUrl = urlData.publicUrl;
